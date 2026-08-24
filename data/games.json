@@ -28,5 +28,65 @@
         "date": "2026-08-24",
         "cover": "empty",
         "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Darkwing%20Duck.nes"
+    },
+    {
+        "id": "contra",
+        "name": "Contra",
+        "developer": "Konami",
+        "year": 1987,
+        "genre": "Run and gun",
+        "date": "2026-08-24",
+        "cover": "empty",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Contra.nes"
+    },
+    {
+        "id": "hammerin-harry",
+        "name": "Hammerin' Harry",
+        "developer": "Irem",
+        "year": 1989,
+        "genre": "Platform",
+        "date": "2026-08-24",
+        "cover": "empty",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Hammerin%20Harry.nes"
+    },
+    {
+        "id": "rainbow-islands",
+        "name": "Rainbow Islands",
+        "developer": "Taito",
+        "year": 1987,
+        "genre": "Platform",
+        "date": "2026-08-24",
+        "cover": "empty",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Rainbow%20Islands%20Bubble%20Bobble%202%20.nes"
+    },
+    {
+        "id": "super-mario-bros",
+        "name": "Super Mario Bros",
+        "developer": "Nintendo",
+        "year": 1985,
+        "genre": "Platform",
+        "date": "2026-08-24",
+        "cover": "empty",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Super%20Mario%20Bros.nes"
+    },
+    {
+        "id": "super-mario-bros-3",
+        "name": "Super Mario Bros 3",
+        "developer": "Nintendo",
+        "year": 1988,
+        "genre": "Platform",
+        "date": "2026-08-24",
+        "cover": "empty",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Super%20Mario%20Bros%203.nes"
+    },
+    {
+        "id": "tetris",
+        "name": "Tetris",
+        "developer": "Nintendo",
+        "year": 1989,
+        "genre": "Puzzle",
+        "date": "2026-08-24",
+        "cover": "empty",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Tetris.nes"
     }
 ]
