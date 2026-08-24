@@ -158,26 +158,14 @@ img {
   }
 }
 
-.console-panel .panel-title {
+.section-title {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.85rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--femi-maroon);
-  margin: 0 0 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.console-panel .panel-title::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--femi-red);
-  box-shadow: 0 0 0 2px var(--femi-ink);
+  margin: 0 0 0.9rem;
 }
 
 .screen-bezel {
@@ -189,6 +177,35 @@ img {
   aspect-ratio: 4 / 3;
   overflow: hidden;
   box-shadow: inset 0 0 0 2px var(--femi-grey);
+}
+
+.fullscreen-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--femi-cream);
+  font-size: 1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  /* El motor pone el <canvas> en position:absolute con z-index:9997
+     inline (se ve recién en runtime, después de cargar un juego) —
+     hay que superar eso a propósito o el canvas tapa el click. */
+  z-index: 9998;
+  opacity: 0.7;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.fullscreen-btn:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.7);
 }
 
 #game {
@@ -242,8 +259,18 @@ img {
   display: none;
 }
 
+.system-info {
+  margin-top: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 .status-bar {
-  margin-top: 0.85rem;
+  margin-top: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -275,6 +302,11 @@ img {
   box-shadow: 0 0 6px var(--femi-red);
 }
 
+.status-bar.is-paused .status-dot {
+  background: var(--femi-grey-light);
+  box-shadow: 0 0 0 2px var(--femi-maroon);
+}
+
 .gamepad-bar {
   margin-top: 0.6rem;
   display: flex;
@@ -282,25 +314,40 @@ img {
   gap: 0.5rem;
   font-size: 0.78rem;
   color: var(--text-muted);
+  padding: 0.5rem 0.7rem;
+  background: var(--panel-2);
+  border: 2px solid var(--border);
+  border-radius: 8px;
 }
 
-.gamepad-bar .gp-icon {
-  width: 16px;
-  height: 16px;
+.gamepad-tag {
   flex: none;
-  opacity: 0.55;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border-radius: 5px;
+  background: var(--femi-red);
+  color: var(--femi-cream);
 }
 
-.gamepad-bar.is-connected .gp-icon {
-  opacity: 1;
-  filter: drop-shadow(0 0 3px var(--femi-red));
+.gamepad-bar.is-connected .gamepad-tag {
+  background: var(--femi-grey);
 }
 
 .console-controls {
   margin-top: 0.85rem;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.5rem;
+}
+
+@media (max-width: 460px) {
+  .console-controls {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* ---------- Botones ---------- */
@@ -393,21 +440,48 @@ img {
 
 .dropzone {
   flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
   border: 2px dashed var(--femi-grey);
   border-radius: 8px;
-  padding: 0.6rem 0.9rem;
-  font-size: 0.78rem;
-  color: var(--text-muted);
+  padding: 0.5rem 1rem;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
 
+.dropzone-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--femi-maroon);
+  transition: color 0.15s ease;
+}
+
+.dropzone-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.dropzone-formats {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--femi-grey);
+}
+
 .dropzone:hover,
 .dropzone.is-dragover {
   border-color: var(--femi-red);
-  color: var(--femi-maroon);
   background: rgba(227, 34, 11, 0.06);
+}
+
+.dropzone:hover .dropzone-title,
+.dropzone.is-dragover .dropzone-title {
+  color: var(--femi-red);
 }
 
 .dropzone input {
@@ -704,6 +778,14 @@ img {
   50% {
     opacity: 0.55;
   }
+}
+
+.btn-reset-defaults {
+  display: block;
+  width: 100%;
+  margin-top: 0.85rem;
+  font-size: 0.66rem;
+  padding: 0.5rem;
 }
 
 .controls-note {
