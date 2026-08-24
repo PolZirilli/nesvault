@@ -1,42 +1,49 @@
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>NESvault — Emulador NES/Famicom en el navegador</title>
-  <meta name="description" content="NESvault — emulador de Nintendo Entertainment System / Famicom en el navegador, motor Nintendo.js.">
+  <meta name="description"
+    content="NESvault — emulador de Nintendo Entertainment System / Famicom en el navegador, motor Nintendo.js.">
   <meta name="keywords" content="nes, famicom, nintendo, emulator, retro, javascript">
   <meta name="theme-color" content="#8e252d">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='10' y='6' width='30' height='20' rx='2' fill='%238e252d'/%3E%3Crect x='6' y='24' width='44' height='30' rx='3' fill='%23e3220b'/%3E%3Ccircle cx='28' cy='42' r='7' fill='%23f5f4ec'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='10' y='6' width='30' height='20' rx='2' fill='%238e252d'/%3E%3Crect x='6' y='24' width='44' height='30' rx='3' fill='%23e3220b'/%3E%3Ccircle cx='28' cy='42' r='7' fill='%23f5f4ec'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
   <header class="site-header">
     <div class="logo">NES<span>vault</span></div>
-    <p class="subtitle">Emulador de <strong>Nintendo Entertainment System / Famicom</strong> en el navegador</p>
+    <p class="subtitle">Emulador de <strong>Nintendo Entertainment System / Famicom</strong></p>
   </header>
 
   <main class="layout">
 
     <section class="console-panel panel">
-      <div class="panel-title">Consola</div>
 
       <div class="screen-bezel">
+        <button class="fullscreen-btn" id="btn-fullscreen" title="Pantalla completa"
+          aria-label="Pantalla completa">⛶</button>
         <div id="game"></div>
         <div class="scanlines"></div>
         <div class="boot-placeholder">
           <svg class="cart-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="10" y="6" width="30" height="20" rx="2" fill="#8e252d"/>
-            <rect x="14" y="10" width="22" height="4" fill="#f5f4ec"/>
-            <rect x="6" y="24" width="44" height="30" rx="3" fill="#e3220b"/>
-            <rect x="6" y="24" width="44" height="8" fill="#31181a" opacity="0.25"/>
-            <circle cx="28" cy="42" r="7" fill="#f5f4ec"/>
-            <circle cx="28" cy="42" r="3" fill="#31181a"/>
+            <rect x="10" y="6" width="30" height="20" rx="2" fill="#8e252d" />
+            <rect x="14" y="10" width="22" height="4" fill="#f5f4ec" />
+            <rect x="6" y="24" width="44" height="30" rx="3" fill="#e3220b" />
+            <rect x="6" y="24" width="44" height="8" fill="#31181a" opacity="0.25" />
+            <circle cx="28" cy="42" r="7" fill="#f5f4ec" />
+            <circle cx="28" cy="42" r="3" fill="#31181a" />
           </svg>
           <span>Elegí un juego del catálogo<br>o cargá tu propio .nes</span>
         </div>
       </div>
+
+      <div class="system-info">NES / Famicom · 60Hz · NTSC</div>
 
       <div class="status-bar" id="status-bar">
         <span class="status-dot"></span>
@@ -44,25 +51,28 @@
       </div>
 
       <div class="gamepad-bar" id="gamepad-bar">
-        <svg class="gp-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 6h-11C4.6 6 3 7.6 3 9.5v5C3 16.4 4.6 18 6.5 18c.9 0 1.7-.4 2.3-1l1.2-1.3c.4-.5 1-.7 1.6-.7h.8c.6 0 1.2.3 1.6.7L15.2 17c.6.6 1.4 1 2.3 1 1.9 0 3.5-1.6 3.5-3.5v-5C21 7.6 19.4 6 17.5 6zM9 11H8v1H6.5v-1H5.5V10H6.5V9H8v1H9v1zm5.5 1.5a1 1 0 110-2 1 1 0 010 2zm2-2.5a1 1 0 110-2 1 1 0 010 2z"/></svg>
-        <span id="gamepad-label">Sin control conectado (opcional)</span>
+        <span class="gamepad-tag" id="gamepad-tag">⚠ ERROR</span>
+        <span id="gamepad-label">🕹️ Control no detectado - Conectá un control y presioná cualquier botón</span>
       </div>
 
       <div class="console-controls">
-        <button class="btn" id="btn-power" disabled>Comenzar</button>
-        <button class="btn" id="btn-fullscreen">Pantalla&nbsp;completa</button>
-        <button class="btn" id="btn-reset">Reiniciar</button>
-        <button class="btn btn-accent btn-full" id="btn-controls">Ver Controles</button>
+        <button class="btn" id="btn-play" disabled>▶ Comenzar</button>
+        <button class="btn" id="btn-pause" disabled>⏸ Pausar</button>
+        <button class="btn" id="btn-stop" disabled>⏹ Detener</button>
+        <button class="btn btn-accent" id="btn-controls">◈ Ver Controles</button>
       </div>
     </section>
 
     <section class="catalog-panel panel">
+      <h2 class="section-title">◈ Catálogo</h2>
       <div class="catalog-toolbar">
         <div class="search-box">
-          <input type="text" id="search-input" placeholder="Buscar por nombre o región…" autocomplete="off">
+          <input type="text" id="search-input" placeholder="🔍 Buscar por nombre o región…" autocomplete="off">
         </div>
         <label class="dropzone" id="dropzone">
-          Cargar tu propio .nes
+          <span class="dropzone-title">⬆ Cargar Juego</span>
+          <span class="dropzone-hint">Arrastrá y soltá tu archivo acá</span>
+          <span class="dropzone-formats">.nes</span>
           <input type="file" id="rom-file-input" accept=".nes,application/octet-stream">
         </label>
       </div>
@@ -81,24 +91,28 @@
   </main>
 
   <footer class="site-footer">
-    Motor: <a href="https://github.com/lrusso/Nintendo" target="_blank" rel="noopener">Nintendo.js</a> (lrusso) · Portadas: <a href="https://github.com/libretro/libretro-thumbnails" target="_blank" rel="noopener">libretro-thumbnails</a> · Parte de la familia GENvault / SNESvault / DOSVault
+    NESvault · Nintendo Entertainment System / Famicom Emulator · <a href="https://github.com/lrusso/Nintendo"
+      target="_blank" rel="noopener">Nintendo.js</a> · Gamepad API
   </footer>
 
   <div class="modal-overlay" id="controls-modal">
     <div class="modal">
       <div class="modal-head">
-        <h2>Ver Controles</h2>
-        <button class="modal-close" data-close-modal aria-label="Cerrar">×</button>
+        <h2>◈ Controles</h2>
+        <button class="modal-close" data-close-modal aria-label="Cerrar">✕</button>
       </div>
       <div class="tabs">
-        <button class="is-active" data-tab="keyboard">Keyboard</button>
-        <button data-tab="gamepad">Gamepad</button>
+        <button class="is-active" data-tab="keyboard">⌨ Teclado</button>
+        <button data-tab="gamepad">🎮 Control</button>
       </div>
       <div class="modal-body">
         <div class="tab-panel is-active" data-tab-panel="keyboard">
           <div id="keyboard-list"></div>
+          <button class="btn btn-ghost btn-reset-defaults" id="btn-reset-keymap">↺ Restablecer valores por
+            defecto</button>
           <div class="controls-note">
-            Player 1 es 100% editable — tocá "Set" y presioná la tecla nueva. Player 2 (numpad) queda fijo por simplicidad.
+            Player 1 es 100% editable — tocá "Set" y presioná la tecla nueva. Player 2 (numpad) queda fijo por
+            simplicidad.
             <ul class="shortcuts-list">
               <li><span>Guardar partida</span><span class="key-badge">Ctrl+1</span></li>
               <li><span>Cargar partida</span><span class="key-badge">Ctrl+2</span></li>
@@ -106,7 +120,7 @@
               <li><span>Pantalla completa</span><span class="key-badge">Ctrl+F</span></li>
               <li><span>Reiniciar</span><span class="key-badge">Ctrl+R</span></li>
             </ul>
-            Estos atajos son del motor (Nintendo.js) y no son remapeables desde acá.
+            Estos atajos funcionan en toda la página mientras haya un juego cargado y no son remapeables desde acá.
           </div>
         </div>
         <div class="tab-panel" data-tab-panel="gamepad">
@@ -115,8 +129,11 @@
             <span>Conectá un control y presioná cualquier botón para activarlo.</span>
           </div>
           <div id="gamepad-list"></div>
+          <button class="btn btn-ghost btn-reset-defaults" id="btn-reset-gpmap">↺ Restablecer valores por
+            defecto</button>
           <div class="controls-note">
-            El control físico se traduce a las mismas teclas del Player 1 — si remapeás el teclado, el control sigue funcionando igual.
+            El control físico se traduce a las mismas teclas del Player 1 — si remapeás el teclado, el control sigue
+            funcionando igual.
           </div>
         </div>
       </div>
@@ -126,4 +143,5 @@
   <script src="js/vendor/Nintendo.min.js"></script>
   <script src="js/app.js"></script>
 </body>
+
 </html>
