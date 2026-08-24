@@ -436,9 +436,39 @@
   }
 
   function stopEmulation() {
-    // El motor no expone una API de "destruir instancia": vaciar el
-    // contenedor es lo mismo que ya hacemos al cambiar de juego
-    // (ver beforeMount). Es la forma prevista de "apagar" acá.
+    // El motor no expone una API de "destruir instancia" documentada,
+    // pero SÍ deja colgado en window el loop de animación (stopLoopNintendo)
+    // y el AudioContext (NINTENDO_AUDIO_CONTEXT) que sigue vivo aunque
+    // vaciemos el contenedor del DOM. Vaciar solo el innerHTML (como
+    // hacíamos antes) saca el video de pantalla pero el loop
+    // requestAnimationFrame del motor sigue corriendo en segundo plano
+    // y el audio nunca se corta — por eso quedaba sonando de fondo
+    // después de "Apagar". Fix: cortar el loop y el audio primero, y
+    // recién después vaciar el contenedor.
+    if (typeof window.stopLoopNintendo === "function") {
+      try {
+        window.stopLoopNintendo();
+      } catch (e) { }
+    }
+    // Belt-and-suspenders: el loop interno del motor (función G) chequea
+    // NINTENDO_RUNNING antes de reprogramarse a sí mismo, así que aunque
+    // algo vuelva a pedir un frame, no hace nada mientras esto sea false.
+    window.NINTENDO_RUNNING = false;
+    if (
+      window.NINTENDO_AUDIO_CONTEXT &&
+      typeof window.NINTENDO_AUDIO_CONTEXT.suspend === "function" &&
+      window.NINTENDO_AUDIO_CONTEXT.state === "running"
+    ) {
+      try {
+        window.NINTENDO_AUDIO_CONTEXT.suspend();
+      } catch (e) { }
+    }
+    // Mismo estado que espera el motor si el usuario vuelve a cargar un
+    // juego después de apagar (ver embedNintendo: si el context está
+    // "suspended" simplemente lo resume en vez de crear uno nuevo).
+    window.NINTENDO_AUDIO_NEXT_TIME = 0;
+    window.NINTENDO_AUDIO_BUFFER_QUEUE = [];
+
     var container = document.getElementById(gameContainerId);
     if (container) container.innerHTML = "";
     var bezel = screenBezel();
