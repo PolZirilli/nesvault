@@ -119,8 +119,8 @@ img {
 
 .layout {
   display: grid;
-  grid-template-columns: 7fr 3fr;
-  /* 70% consola / 30% catálogo */
+  grid-template-columns: 6fr 4fr;
+  /* 60% consola / 40% catálogo */
   gap: 1.5rem;
   max-width: 1760px;
   margin: 0 auto;
