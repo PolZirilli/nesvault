@@ -91,11 +91,11 @@ img {
 .site-header .logo {
   display: inline-flex;
   align-items: baseline;
-  gap: 0.1rem;
+  gap: 0.5rem;
   font-family: var(--font-display);
-  font-weight: 500;
-  font-size: clamp(2rem, 5vw, 2.2rem);
-  letter-spacing: 0.03em;
+  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  letter-spacing: 0.04em;
   color: var(--femi-red);
   text-shadow: var(--shadow-hard);
 }
@@ -119,12 +119,9 @@ img {
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(460px, 640px) 1fr;
+  grid-template-columns: 7fr 3fr;
+  /* 70% consola / 30% catálogo */
   gap: 1.5rem;
-  /* Bastante más ancho que la consola (max 640px) + el margen para
-     que el panel de catálogo pueda superar los 950px y llegar a
-     5 columnas en monitores grandes (ver @container en .rom-page) —
-     con un max-width más corto, ese breakpoint quedaba inalcanzable. */
   max-width: 1760px;
   margin: 0 auto;
   padding: 0 1.25rem 3rem;
@@ -145,14 +142,14 @@ img {
 }
 
 /* ---------- Consola ---------- */
-/* Columna lateral (como GENvault/SNESvault), pero más ancha que un
-   sidebar angosto para que la pantalla se vea grande: 460–640px en
-   vez de los ~320–420px de un sidebar típico. */
+/* Columna lateral 70% del ancho (como GENvault/SNESvault, pero
+   proporción 70/30 pedida por Pol). */
 
 .console-panel {
   padding: 1.1rem;
   position: sticky;
   top: 1.25rem;
+  min-width: 0;
 }
 
 @media (max-width: 1020px) {
@@ -362,15 +359,6 @@ img {
 .catalog-panel {
   padding: 1.1rem 1.1rem 1.35rem;
   min-width: 0;
-  /* Layout lado a lado: el ancho de este panel ya NO es el ancho de
-     la ventana (le resta el ancho de .console-panel). Las columnas
-     del carousel se definen por container query sobre el ancho
-     REAL de este panel, no por @media de ventana — si no, con la
-     consola ancha el grid pediría 5 columnas aunque el panel esté
-     angosto. js/app.js sincroniza los mismos 2 breakpoints (950px /
-     480px) vía ResizeObserver sobre este mismo elemento. */
-  container-type: inline-size;
-  container-name: catalog;
 }
 
 .catalog-toolbar {
@@ -428,22 +416,24 @@ img {
 
 .rom-carousel {
   position: relative;
+  /* Sin padding propio a propósito: la container query de abajo
+     mide el content-box de ESTE elemento, y js/app.js mide su
+     clientWidth con getCarouselColumns() — si este elemento tuviera
+     padding, ambas medidas dejarían de coincidir en el límite del
+     breakpoint (border-box vs content-box). */
+  container-type: inline-size;
+  container-name: catalog;
 }
 
 .rom-page {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
+  /* 4 columnas x 2 filas = 8 por página */
   grid-auto-rows: 1fr;
-  gap: 0.9rem;
+  gap: 0.7rem;
 }
 
-@container catalog (max-width: 950px) {
-  .rom-page {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@container catalog (max-width: 480px) {
+@container catalog (max-width: 260px) {
   .rom-page {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -493,11 +483,11 @@ img {
 }
 
 .rom-card .meta {
-  padding: 0.5rem 0.55rem 0.6rem;
+  padding: 0.4rem 0.4rem 0.5rem;
 }
 
 .rom-card .name {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 700;
   line-height: 1.25;
   display: -webkit-box;
