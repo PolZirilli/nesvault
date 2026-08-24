@@ -17,6 +17,10 @@ Extraída de la consola Famicom (HVC-001) real vía clustering de color:
 | `--femi-grey-light` | `#c4b7b5` | bordes suaves |
 | `--femi-blue` | `#182c88` | acento menor (uso puntual) |
 
+## Layout
+
+2 columnas lado a lado (como GENvault/SNESvault): consola a la izquierda (460–640px, `position: sticky`), catálogo a la derecha. El ancho del panel de catálogo NO es el ancho de la ventana — le resta lo que ocupa la consola — así que el carousel de 5/3/2 columnas usa **CSS container queries** (`@container catalog (max-width: 950px / 480px)` en `css/styles.css`) y `ResizeObserver` sobre `.catalog-panel` en `js/app.js` (`getCarouselColumns()`), no `@media`/`window.innerWidth`. Si tocás los breakpoints, cambiá los tres lugares a la vez: el CSS container query, `getCarouselColumns()`, y el comentario que los referencia. Se apila a 1 columna en pantallas angostas (`max-width: 1020px`).
+
 ## Estructura
 
 ```
@@ -77,6 +81,7 @@ Arte de tapa real, no placeholders — mismo criterio de riesgo asumido (uso no 
 - **Tiene que servirse desde el mismo origen que la página** — el script chequea `document.currentScript.src` contra `window.location.origin` y tira error si no coincide. Por eso está vendorizado local en `js/vendor/Nintendo.min.js` y no cargado desde un CDN (mismo gotcha ya documentado para `SuperNintendo.min.js` en SNESvault).
 - API: `embedNintendo({ container, name, rom, soundEnabled, showMobileControls, backText, soundText, loadText, saveText, player1, player2, cbStarted })`. Funciones sueltas: `resetNintendo()`, `toggleSoundNintendo()`, `downloadStateNintendo()` (guardar), `uploadStateNintendo()` (cargar), `requestEmulatorFullscreenNintendo()`.
 - Keymap por defecto (Player 1): D-Pad = flechas, A = `KeyX`, B = `KeyZ`, Select = `KeyA`, Start = `KeyS`. Remapeable desde "Ver Controles" → `localStorage` (`nesvault_keymap`). Player 2 (numpad) queda fijo.
+- **Gotcha crítico ya pisado y corregido acá**: el parámetro `name` de `embedNintendo()` tiene que tener pinta de nombre de archivo real (con extensión `.nes`). Si se le pasa un nombre "lindo" de catálogo sin extensión (ej. `"Super Mario Bros."`, `"Zelda (USA)"`), el motor **no tira error** y el canvas se monta igual, pero `cbStarted` nunca dispara — el juego queda mudo/no arranca de verdad, sin ningún mensaje en consola. `js/app.js` lo resuelve separando el nombre técnico (derivado del archivo en `game.url` vía `filenameFromUrl()`, siempre con `.nes`) del nombre lindo que se muestra en la UI (`game.name`, usado solo para el status bar). Si en algún momento se toca `mountRom()`, no volver a pasar el nombre de catálogo directo como `name` del motor.
 - Gamepad: NESvault NO usa un parámetro nativo del motor para mandos (Nintendo.js no expone uno en `embedNintendo`) — en cambio, `js/app.js` sondea la Gamepad API estándar y traduce cada botón a un evento de teclado sintético usando el keymap ACTUAL de Player 1. Ventaja: remapear el teclado remapea el control físico automáticamente, sin duplicar lógica. Mapeo botón→acción editable en "Ver Controles" → `localStorage` (`nesvault_gpmap`).
 
 ## Deploy (Netlify)
