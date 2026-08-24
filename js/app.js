@@ -166,9 +166,15 @@
   }
 
   function getCarouselColumns() {
-    var w = window.innerWidth;
-    if (w <= 620) return 2;
-    if (w <= 1180) return 3;
+    // Layout lado a lado (consola + catálogo): el ancho relevante es
+    // el del panel de catálogo, NO el de la ventana — la consola le
+    // resta ancho real. Mismos 2 breakpoints que las @container
+    // queries de .rom-page en css/styles.css (950px / 480px); si
+    // cambiás uno, cambiá el otro.
+    var panel = $(".catalog-panel");
+    var w = panel ? panel.clientWidth : window.innerWidth;
+    if (w <= 480) return 2;
+    if (w <= 950) return 3;
     return 5;
   }
 
@@ -329,8 +335,12 @@
         renderCarousel();
       });
 
+    // Se observa el panel de catálogo (no window.resize): en el
+    // layout lado a lado su ancho cambia con breakpoints propios,
+    // no 1:1 con el ancho de la ventana.
+    var panel = $(".catalog-panel");
     var resizeTimer = null;
-    window.addEventListener("resize", function () {
+    function onPanelResize() {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
         var newCols = getCarouselColumns();
@@ -339,7 +349,13 @@
           renderCarousel();
         }
       }, 150);
-    });
+    }
+    if (panel && typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(onPanelResize).observe(panel);
+    } else {
+      // Fallback para navegadores sin ResizeObserver
+      window.addEventListener("resize", onPanelResize);
+    }
   }
 
   // ---------- Carga de ROM / motor ----------
@@ -359,13 +375,24 @@
     if (container) container.innerHTML = "";
   }
 
-  function mountRom(name, arrayBuffer) {
+  // IMPORTANTE: `name` acá es el nombre TÉCNICO que recibe el motor,
+  // no el nombre lindo para mostrar en pantalla. Nintendo.js necesita
+  // que tenga pinta de archivo real (con extensión .nes) — si se le
+  // pasa un nombre de catálogo tipo "Super Mario Bros." o "Zelda
+  // (USA)" sin extensión, embedNintendo() NO tira error pero
+  // `cbStarted` nunca dispara (se detectó jugando: el canvas se
+  // monta igual, pero el juego queda mudo/no arranca de verdad).
+  // Por eso loadGameFromCatalog() deriva un nombre de archivo real
+  // desde la URL de la ROM, y el nombre lindo se pasa aparte solo
+  // para la UI (status bar).
+  function mountRom(engineName, arrayBuffer, displayName) {
     beforeMount();
     var keymap = currentKeymap();
+    var label = displayName || engineName;
 
     embedNintendo({
       container: gameContainerId,
-      name: name,
+      name: engineName,
       rom: arrayBuffer,
       soundEnabled: true,
       showMobileControls: isMobileDevice(),
@@ -377,10 +404,40 @@
       player2: PLAYER2_KEYMAP,
       cbStarted: function () {
         state.isPlaying = true;
-        state.currentGameName = name;
+        state.currentGameName = label;
         updateStatusBar();
+        updatePowerButton();
       },
     });
+  }
+
+  function filenameFromUrl(url) {
+    try {
+      var clean = url.split("?")[0].split("#")[0];
+      var parts = clean.split("/");
+      var last = decodeURIComponent(parts[parts.length - 1] || "");
+      return /\.nes$/i.test(last) ? last : last + ".nes";
+    } catch (e) {
+      return "game.nes";
+    }
+  }
+
+  function stopEmulation() {
+    // El motor no expone una API de "destruir instancia": vaciar el
+    // contenedor es lo mismo que ya hacemos al cambiar de juego
+    // (ver beforeMount). Es la forma prevista de "apagar" acá.
+    var container = document.getElementById(gameContainerId);
+    if (container) container.innerHTML = "";
+    var bezel = screenBezel();
+    if (bezel) bezel.classList.remove("is-hidden-placeholder");
+
+    state.isPlaying = false;
+    state.currentGameName = "";
+    var label = $("#status-game");
+    if (label) label.textContent = "Sin juego cargado";
+    var bar = $("#status-bar");
+    if (bar) bar.classList.remove("is-playing");
+    updatePowerButton();
   }
 
   function isMobileDevice() {
@@ -400,7 +457,7 @@
         return res.arrayBuffer();
       })
       .then(function (buf) {
-        mountRom(game.name, buf);
+        mountRom(filenameFromUrl(game.url), buf, game.name);
       })
       .catch(function (err) {
         console.error("[nesvault] error cargando ROM:", game, err);
@@ -466,6 +523,8 @@
     var label = $("#status-game");
     if (label) label.textContent = "Cargando " + name + "…";
     if (bar) bar.classList.remove("is-playing");
+    state.isPlaying = false;
+    updatePowerButton();
   }
 
   function setStatusError(name) {
@@ -480,10 +539,30 @@
     if (bar) bar.classList.toggle("is-playing", state.isPlaying);
   }
 
+  function updatePowerButton() {
+    var powerBtn = $("#btn-power");
+    if (!powerBtn) return;
+    if (state.isPlaying) {
+      powerBtn.textContent = "Apagar";
+      powerBtn.disabled = false;
+    } else {
+      powerBtn.textContent = "Comenzar";
+      // Sin juego cargado no hay nada que "encender" desde acá —
+      // se elige juego desde el catálogo o la carga manual.
+      powerBtn.disabled = true;
+    }
+  }
+
   function setupConsoleControls() {
+    var powerBtn = $("#btn-power");
     var resetBtn = $("#btn-reset");
     var fullscreenBtn = $("#btn-fullscreen");
     var controlsBtn = $("#btn-controls");
+
+    if (powerBtn)
+      powerBtn.addEventListener("click", function () {
+        if (state.isPlaying) stopEmulation();
+      });
 
     if (resetBtn)
       resetBtn.addEventListener("click", function () {
