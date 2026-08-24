@@ -1,1 +1,32 @@
-[]
+[
+    {
+        "id": "zelda-ii",
+        "name": "Zelda II: The Adventure of Link",
+        "developer": "Konami",
+        "year": 1986,
+        "genre": "Action-adventure",
+        "date": "2026-08-24",
+        "cover": "empty",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Zelda%20II%20The%20Adventure%20of%20Link.nes"
+    },
+    {
+        "id": "darkman",
+        "name": "Darkman",
+        "developer": "Ocean",
+        "year": 1990,
+        "genre": "Platform",
+        "date": "2026-08-24",
+        "cover": "empty",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Darkman.nes"
+    },
+    {
+        "id": "darkwing-duck",
+        "name": "Darkwing Duck",
+        "developer": "Capcom",
+        "year": 1992,
+        "genre": "Platform",
+        "date": "2026-08-24",
+        "cover": "empty",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Darkwing%20Duck.nes"
+    }
+]
