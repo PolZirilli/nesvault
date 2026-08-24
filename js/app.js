@@ -4,9 +4,11 @@
    - loadGameLibrary() lee data/games.json y descarta con
      typeof g.url === 'string' (evita el bug silencioso ya
      pisado en GENvault con la key `bundle` en vez de `url`).
-   - getCarouselColumns() sincronizado 1:1 con los breakpoints
-     de css/styles.css (.rom-page): >1180px → 5, ≤1180px → 3,
-     ≤620px → 2. Si cambiás un breakpoint, cambiá los dos.
+   - Layout 70/30 (consola/catálogo). getCarouselColumns() lee el
+     ancho de .rom-carousel y da 4 columnas (2 en pantallas muy
+     angostas, ≤260px), sincronizado 1:1 con la @container query
+     de css/styles.css (.rom-page). Si cambiás el breakpoint,
+     cambiá los dos lugares.
    - Motor: Nintendo.js (lrusso), vendorizado en js/vendor/.
      API global: embedNintendo({...}), y funciones sueltas
      resetNintendo(), toggleSoundNintendo(),
@@ -83,7 +85,7 @@
     games: [],
     filtered: [],
     page: 0,
-    columns: 5,
+    columns: 4,
     listeningAction: null, // acción esperando una tecla nueva
     isPlaying: false,
     currentGameName: "",
@@ -166,16 +168,18 @@
   }
 
   function getCarouselColumns() {
-    // Layout lado a lado (consola + catálogo): el ancho relevante es
-    // el del panel de catálogo, NO el de la ventana — la consola le
-    // resta ancho real. Mismos 2 breakpoints que las @container
-    // queries de .rom-page en css/styles.css (950px / 480px); si
-    // cambiás uno, cambiá el otro.
-    var panel = $(".catalog-panel");
+    // Layout 70/30 (consola/catálogo): 4 columnas fijas — con esa
+    // proporción, el panel de catálogo mide ~250-510px de ancho real
+    // en desktop, así que 2 columnas queda solo como último recurso
+    // para pantallas realmente angostas (celulares chicos en el
+    // layout apilado). Se mide .rom-carousel (no .catalog-panel)
+    // porque no tiene padding propio, así el clientWidth que lee JS
+    // coincide exacto con el content-box que usa la @container
+    // query de .rom-page en css/styles.css — si cambiás el
+    // breakpoint (260px), cambiá los dos lugares.
+    var panel = $(".rom-carousel");
     var w = panel ? panel.clientWidth : window.innerWidth;
-    if (w <= 480) return 2;
-    if (w <= 950) return 3;
-    return 5;
+    return w <= 260 ? 2 : 4;
   }
 
   function pageSize() {
@@ -217,10 +221,10 @@
 
     grid.innerHTML = pageItems
       .map(function (game) {
-        var coverHTML = game.cover
+        var coverHTML = hasCover(game.cover)
           ? '<img src="' +
-            escapeAttr(game.cover) +
-            '" alt="" loading="lazy" onerror="this.parentNode.innerHTML = this.parentNode.dataset.fallback">'
+          escapeAttr(game.cover) +
+          '" alt="" loading="lazy" onerror="this.parentNode.innerHTML = this.parentNode.dataset.fallback">'
           : cartIconSVG();
         return (
           '<button class="rom-card" data-id="' +
@@ -256,6 +260,15 @@
 
     renderDots(pages);
     updateArrows(state.page, pages);
+  }
+
+  function hasCover(cover) {
+    // Trata valores placeholder tipo "empty"/"null"/"none"/"n/a"
+    // (a veces quedan así en el JSON por error) igual que sin
+    // portada, para no pedirle al navegador una URL que no existe.
+    if (!cover || typeof cover !== "string") return false;
+    var v = cover.trim().toLowerCase();
+    return v !== "" && v !== "empty" && v !== "null" && v !== "none" && v !== "n/a";
   }
 
   function escapeHTML(str) {
@@ -312,10 +325,10 @@
       state.filtered = !q
         ? state.games.slice()
         : state.games.filter(function (g) {
-            var name = (g.name || "").toLowerCase();
-            var region = (g.region || "").toLowerCase();
-            return name.indexOf(q) !== -1 || region.indexOf(q) !== -1;
-          });
+          var name = (g.name || "").toLowerCase();
+          var region = (g.region || "").toLowerCase();
+          return name.indexOf(q) !== -1 || region.indexOf(q) !== -1;
+        });
       state.page = 0;
       renderCarousel();
     });
@@ -335,10 +348,10 @@
         renderCarousel();
       });
 
-    // Se observa el panel de catálogo (no window.resize): en el
-    // layout lado a lado su ancho cambia con breakpoints propios,
-    // no 1:1 con el ancho de la ventana.
-    var panel = $(".catalog-panel");
+    // Se observa .rom-carousel (no window.resize): en el layout lado
+    // a lado su ancho cambia con breakpoints propios, no 1:1 con el
+    // ancho de la ventana. Mismo elemento que mide getCarouselColumns().
+    var panel = $(".rom-carousel");
     var resizeTimer = null;
     function onPanelResize() {
       clearTimeout(resizeTimer);
