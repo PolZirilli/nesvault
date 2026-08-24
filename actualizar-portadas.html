@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>NESvault — Actualizar portadas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: "Space Mono", monospace; background: #f5f4ec; color: #31181a; max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+    h1 { color: #8e252d; font-size: 1.4rem; }
+    p { line-height: 1.6; }
+    button { font-family: inherit; font-weight: bold; background: #e3220b; color: #f5f4ec; border: 2px solid #31181a; border-radius: 8px; padding: 0.7rem 1.2rem; cursor: pointer; box-shadow: 3px 3px 0 #31181a; }
+    button:hover { background: #b41a09; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button:active { transform: translate(2px,2px); box-shadow: none; }
+    #log { margin-top: 1.5rem; background: #fffdf9; border: 2px solid #c4b7b5; border-radius: 8px; padding: 1rem; height: 340px; overflow-y: auto; font-size: 0.82rem; white-space: pre-wrap; }
+    #log .ok { color: #1a7a3c; }
+    #log .miss { color: #a15b00; }
+    #log .err { color: #b41a09; }
+    #download { margin-left: 0.6rem; background: #6e6c6e; }
+    .field { margin: 0.5rem 0 1rem; }
+    label { display: block; font-size: 0.8rem; margin-bottom: 0.25rem; color: #6a4a4c; }
+    input[type=number] { width: 6rem; padding: 0.35rem; border: 2px solid #31181a; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>NESvault — Actualizar portadas</h1>
+  <p>
+    Busca el arte de tapa real en
+    <a href="https://github.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System" target="_blank" rel="noopener">libretro-thumbnails</a>
+    (carpeta <code>Named_Boxarts</code>) para cada juego de <code>data/games.json</code> que no tenga <code>cover</code>, y arma
+    un <code>games.json</code> actualizado para descargar y reemplazar en el repo. 100% client-side, vía la API de Trees de GitHub — no requiere API key ni backend.
+  </p>
+  <p>
+    Algoritmo: normaliza nombres (minúsculas, sin paréntesis/corchetes, sin puntuación) →
+    match exacto → si no hay, match fuzzy por similitud de texto por encima del umbral.
+  </p>
+
+  <div class="field">
+    <label for="threshold">Umbral fuzzy (0–1)</label>
+    <input type="number" id="threshold" value="0.72" min="0" max="1" step="0.01">
+  </div>
+
+  <button id="run">Buscar portadas</button>
+  <button id="download" disabled>Descargar games.json actualizado</button>
+
+  <div id="log">Listo. Tocá "Buscar portadas" para empezar…</div>
+
+  <script>
+    var GAMES_JSON_URL = "data/games.json";
+    var TREE_API_URL = "https://api.github.com/repos/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/git/trees/master?recursive=1";
+    var RAW_BASE_URL = "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/";
+    var BOXART_PREFIX = "Named_Boxarts/";
+
+    var logEl = document.getElementById("log");
+    var runBtn = document.getElementById("run");
+    var downloadBtn = document.getElementById("download");
+    var thresholdInput = document.getElementById("threshold");
+
+    var updatedGames = null;
+
+    function log(msg, cls) {
+      var line = document.createElement("div");
+      if (cls) line.className = cls;
+      line.textContent = msg;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function clearLog() {
+      logEl.innerHTML = "";
+    }
+
+    function normalize(name) {
+      return name
+        .toLowerCase()
+        .replace(/[\(\[][^\)\]]*[\)\]]/g, " ")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim()
+        .replace(/\s+/g, " ");
+    }
+
+    // Similitud simple tipo Ratcliff/Obershelp (equivalente liviano a difflib.SequenceMatcher.ratio)
+    function similarity(a, b) {
+      if (a === b) return 1;
+      if (!a.length || !b.length) return 0;
+      var matches = 0;
+      var aChars = a.split("");
+      var used = new Array(b.length).fill(false);
+      for (var i = 0; i < aChars.length; i++) {
+        for (var j = 0; j < b.length; j++) {
+          if (!used[j] && b[j] === aChars[i]) {
+            used[j] = true;
+            matches++;
+            break;
+          }
+        }
+      }
+      return (2 * matches) / (a.length + b.length);
+    }
+
+    function buildIndex(filenames) {
+      var index = {};
+      filenames.forEach(function (fname) {
+        var base = fname.toLowerCase().endsWith(".png") ? fname.slice(0, -4) : fname;
+        var norm = normalize(base);
+        if (!(norm in index)) index[norm] = fname;
+      });
+      return index;
+    }
+
+    function findMatch(name, index, threshold) {
+      var norm = normalize(name);
+      if (index[norm]) return { file: index[norm], score: 1 };
+
+      var bestFile = null;
+      var bestScore = 0;
+      for (var key in index) {
+        var score = similarity(norm, key);
+        if (score > bestScore) {
+          bestScore = score;
+          bestFile = index[key];
+        }
+      }
+      if (bestScore >= threshold) return { file: bestFile, score: bestScore };
+      return { file: null, score: bestScore };
+    }
+
+    async function run() {
+      clearLog();
+      runBtn.disabled = true;
+      downloadBtn.disabled = true;
+      var threshold = parseFloat(thresholdInput.value) || 0.72;
+
+      try {
+        log("Descargando catálogo (" + GAMES_JSON_URL + ")…");
+        var gamesRes = await fetch(GAMES_JSON_URL, { cache: "no-store" });
+        if (!gamesRes.ok) throw new Error("No pude leer " + GAMES_JSON_URL + " (HTTP " + gamesRes.status + ")");
+        var games = await gamesRes.json();
+
+        log("Descargando índice de tapas de libretro-thumbnails…");
+        var treeRes = await fetch(TREE_API_URL);
+        if (!treeRes.ok) {
+          if (treeRes.status === 403) {
+            throw new Error("Rate limit de la API de GitHub (60 req/hora sin auth). Probá de nuevo en un rato.");
+          }
+          throw new Error("Error consultando GitHub API (HTTP " + treeRes.status + ")");
+        }
+        var tree = await treeRes.json();
+        var filenames = (tree.tree || [])
+          .map(function (e) { return e.path; })
+          .filter(function (p) { return p.indexOf(BOXART_PREFIX) === 0 && p.toLowerCase().endsWith(".png"); })
+          .map(function (p) { return p.slice(BOXART_PREFIX.length); });
+
+        log(filenames.length + " tapas encontradas.\n");
+        var index = buildIndex(filenames);
+
+        var matched = 0, unmatched = 0;
+        games.forEach(function (game) {
+          if (!game.name) return;
+          var result = findMatch(game.name, index, threshold);
+          if (result.file) {
+            var coverUrl = RAW_BASE_URL + encodeURIComponent(result.file);
+            if (game.cover !== coverUrl) {
+              log("[OK] " + game.name + " -> " + result.file + " (score " + result.score.toFixed(2) + ")", "ok");
+            }
+            game.cover = coverUrl;
+            matched++;
+          } else {
+            log("[--] " + game.name + " sin match (mejor score " + result.score.toFixed(2) + ")", "miss");
+            unmatched++;
+          }
+        });
+
+        log("\nListo: " + matched + " con tapa, " + unmatched + " sin tapa.");
+        updatedGames = games;
+        downloadBtn.disabled = false;
+      } catch (err) {
+        log("Error: " + err.message, "err");
+        console.error(err);
+      } finally {
+        runBtn.disabled = false;
+      }
+    }
+
+    function download() {
+      if (!updatedGames) return;
+      var blob = new Blob([JSON.stringify(updatedGames, null, 2) + "\n"], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "games.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    runBtn.addEventListener("click", run);
+    downloadBtn.addEventListener("click", download);
+  </script>
+</body>
+</html>
