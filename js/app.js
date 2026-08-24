@@ -4,16 +4,28 @@
    - loadGameLibrary() lee data/games.json y descarta con
      typeof g.url === 'string' (evita el bug silencioso ya
      pisado en GENvault con la key `bundle` en vez de `url`).
-   - Layout 70/30 (consola/catálogo). getCarouselColumns() lee el
+   - Layout 60/40 (consola/catálogo). getCarouselColumns() lee el
      ancho de .rom-carousel y da 4 columnas (2 en pantallas muy
      angostas, ≤260px), sincronizado 1:1 con la @container query
      de css/styles.css (.rom-page). Si cambiás el breakpoint,
      cambiá los dos lugares.
+   - Botonera de consola tipo GENvault/SNESvault: Comenzar (▶,
+     reanuda) / Pausar (⏸) / Detener (⏹) / Ver Controles (◈), en
+     vez de un único botón de power on/off. Pantalla completa es
+     un ícono (⛶) superpuesto sobre la pantalla, no un botón en la
+     fila. Reiniciar no tiene botón propio — solo atajo Ctrl+R
+     (ver setupGlobalShortcuts()).
    - Motor: Nintendo.js (lrusso), vendorizado en js/vendor/.
-     API global: embedNintendo({...}), y funciones sueltas
-     resetNintendo(), toggleSoundNintendo(),
-     downloadStateNintendo(), uploadStateNintendo(),
-     requestEmulatorFullscreenNintendo().
+     API pública: embedNintendo({...}), resetNintendo(),
+     toggleSoundNintendo(), downloadStateNintendo(),
+     uploadStateNintendo(), requestEmulatorFullscreenNintendo().
+     Globals internos NO documentados pero usados acá para
+     pausar/reanudar/detener de verdad (video Y audio): mismos
+     que usa el motor en su propio blur/focus de ventana —
+     stopLoopNintendo()/startLoopNintendo(), NINTENDO_RUNNING,
+     NINTENDO_PAUSED, NINTENDO_AUDIO_CONTEXT, NINTENDO_AUDIO_NEXT_TIME,
+     NINTENDO_AUDIO_BUFFER_QUEUE. Si se actualiza el motor, re-chequear
+     que sigan existiendo con el mismo nombre.
    ============================================================ */
 
 (function () {
@@ -87,7 +99,8 @@
     page: 0,
     columns: 4,
     listeningAction: null, // acción esperando una tecla nueva
-    isPlaying: false,
+    hasGame: false, // hay una sesión de juego activa (jugando O pausada)
+    isPaused: false,
     currentGameName: "",
   };
 
@@ -416,10 +429,11 @@
       player1: keymap,
       player2: PLAYER2_KEYMAP,
       cbStarted: function () {
-        state.isPlaying = true;
+        state.hasGame = true;
+        state.isPaused = false;
         state.currentGameName = label;
         updateStatusBar();
-        updatePowerButton();
+        updateTransportButtons();
       },
     });
   }
@@ -435,6 +449,59 @@
     }
   }
 
+  // El motor NO expone pausar/reanudar como API pública, pero sí lo
+  // implementa internamente (auto-pausa al perder foco la ventana,
+  // reanuda al recuperarlo) usando estas mismas variables globales.
+  // pauseEmulation()/resumeEmulation() reproducen exactamente esa
+  // misma secuencia a pedido del usuario (botones Pausar/Comenzar)
+  // en vez de depender de blur/focus del browser.
+
+  function pauseEmulation() {
+    if (!state.hasGame || state.isPaused) return;
+    state.isPaused = true;
+    if (typeof window.stopLoopNintendo === "function") {
+      try {
+        window.stopLoopNintendo();
+      } catch (e) { }
+    }
+    window.NINTENDO_PAUSED = true;
+    if (
+      window.NINTENDO_AUDIO_CONTEXT &&
+      window.NINTENDO_AUDIO_CONTEXT.state === "running"
+    ) {
+      try {
+        window.NINTENDO_AUDIO_CONTEXT.suspend();
+      } catch (e) { }
+    }
+    updateStatusBar();
+    updateTransportButtons();
+  }
+
+  function resumeEmulation() {
+    if (!state.hasGame || !state.isPaused) return;
+    state.isPaused = false;
+    window.NINTENDO_PAUSED = false;
+    // Mismo reset de timing que hace el motor en su propio handler de
+    // "focus" antes de reanudar — si no, el audio arranca desfasado.
+    window.NINTENDO_AUDIO_NEXT_TIME = 0;
+    window.NINTENDO_AUDIO_BUFFER_QUEUE = [];
+    if (
+      window.NINTENDO_AUDIO_CONTEXT &&
+      window.NINTENDO_AUDIO_CONTEXT.state === "suspended"
+    ) {
+      try {
+        window.NINTENDO_AUDIO_CONTEXT.resume();
+      } catch (e) { }
+    }
+    if (typeof window.startLoopNintendo === "function") {
+      try {
+        window.startLoopNintendo(window.NINTENDO_TARGET_FPS);
+      } catch (e) { }
+    }
+    updateStatusBar();
+    updateTransportButtons();
+  }
+
   function stopEmulation() {
     // El motor no expone una API de "destruir instancia" documentada,
     // pero SÍ deja colgado en window el loop de animación (stopLoopNintendo)
@@ -443,7 +510,7 @@
     // hacíamos antes) saca el video de pantalla pero el loop
     // requestAnimationFrame del motor sigue corriendo en segundo plano
     // y el audio nunca se corta — por eso quedaba sonando de fondo
-    // después de "Apagar". Fix: cortar el loop y el audio primero, y
+    // después de "Detener". Fix: cortar el loop y el audio primero, y
     // recién después vaciar el contenedor.
     if (typeof window.stopLoopNintendo === "function") {
       try {
@@ -454,6 +521,7 @@
     // NINTENDO_RUNNING antes de reprogramarse a sí mismo, así que aunque
     // algo vuelva a pedir un frame, no hace nada mientras esto sea false.
     window.NINTENDO_RUNNING = false;
+    window.NINTENDO_PAUSED = false;
     if (
       window.NINTENDO_AUDIO_CONTEXT &&
       typeof window.NINTENDO_AUDIO_CONTEXT.suspend === "function" &&
@@ -474,13 +542,17 @@
     var bezel = screenBezel();
     if (bezel) bezel.classList.remove("is-hidden-placeholder");
 
-    state.isPlaying = false;
+    state.hasGame = false;
+    state.isPaused = false;
     state.currentGameName = "";
     var label = $("#status-game");
     if (label) label.textContent = "Sin juego cargado";
     var bar = $("#status-bar");
-    if (bar) bar.classList.remove("is-playing");
-    updatePowerButton();
+    if (bar) {
+      bar.classList.remove("is-playing");
+      bar.classList.remove("is-paused");
+    }
+    updateTransportButtons();
   }
 
   function isMobileDevice() {
@@ -565,9 +637,13 @@
     var bar = $("#status-bar");
     var label = $("#status-game");
     if (label) label.textContent = "Cargando " + name + "…";
-    if (bar) bar.classList.remove("is-playing");
-    state.isPlaying = false;
-    updatePowerButton();
+    if (bar) {
+      bar.classList.remove("is-playing");
+      bar.classList.remove("is-paused");
+    }
+    state.hasGame = false;
+    state.isPaused = false;
+    updateTransportButtons();
   }
 
   function setStatusError(name) {
@@ -578,49 +654,93 @@
   function updateStatusBar() {
     var bar = $("#status-bar");
     var label = $("#status-game");
-    if (label) label.textContent = state.currentGameName;
-    if (bar) bar.classList.toggle("is-playing", state.isPlaying);
+    if (label) {
+      label.textContent =
+        state.currentGameName + (state.isPaused ? " (Pausado)" : "");
+    }
+    if (bar) {
+      bar.classList.toggle("is-playing", state.hasGame && !state.isPaused);
+      bar.classList.toggle("is-paused", state.hasGame && state.isPaused);
+    }
   }
 
-  function updatePowerButton() {
-    var powerBtn = $("#btn-power");
-    if (!powerBtn) return;
-    if (state.isPlaying) {
-      powerBtn.textContent = "Apagar";
-      powerBtn.disabled = false;
-    } else {
-      powerBtn.textContent = "Comenzar";
-      // Sin juego cargado no hay nada que "encender" desde acá —
-      // se elige juego desde el catálogo o la carga manual.
-      powerBtn.disabled = true;
+  // Botonera tipo GENvault/SNESvault: Comenzar (reanudar) / Pausar /
+  // Detener, en vez de un único toggle de power on-off.
+  function updateTransportButtons() {
+    var playBtn = $("#btn-play");
+    var pauseBtn = $("#btn-pause");
+    var stopBtn = $("#btn-stop");
+    if (playBtn) playBtn.disabled = !(state.hasGame && state.isPaused);
+    if (pauseBtn) pauseBtn.disabled = !(state.hasGame && !state.isPaused);
+    if (stopBtn) stopBtn.disabled = !state.hasGame;
+  }
+
+  function requestFullscreen() {
+    if (typeof requestEmulatorFullscreenNintendo === "function") {
+      try {
+        requestEmulatorFullscreenNintendo();
+      } catch (e) { }
+    }
+  }
+
+  function resetConsole() {
+    if (!state.hasGame) return;
+    if (typeof resetNintendo === "function") {
+      try {
+        resetNintendo();
+      } catch (e) { }
     }
   }
 
   function setupConsoleControls() {
-    var powerBtn = $("#btn-power");
-    var resetBtn = $("#btn-reset");
+    var playBtn = $("#btn-play");
+    var pauseBtn = $("#btn-pause");
+    var stopBtn = $("#btn-stop");
     var fullscreenBtn = $("#btn-fullscreen");
     var controlsBtn = $("#btn-controls");
 
-    if (powerBtn)
-      powerBtn.addEventListener("click", function () {
-        if (state.isPlaying) stopEmulation();
+    if (playBtn) playBtn.addEventListener("click", resumeEmulation);
+    if (pauseBtn) pauseBtn.addEventListener("click", pauseEmulation);
+    if (stopBtn)
+      stopBtn.addEventListener("click", function () {
+        if (state.hasGame) stopEmulation();
       });
+    if (fullscreenBtn) fullscreenBtn.addEventListener("click", requestFullscreen);
+    if (controlsBtn) controlsBtn.addEventListener("click", openControlsModal);
+  }
 
-    if (resetBtn)
-      resetBtn.addEventListener("click", function () {
-        if (typeof resetNintendo === "function") resetNintendo();
-      });
-
-    if (fullscreenBtn)
-      fullscreenBtn.addEventListener("click", function () {
-        if (typeof requestEmulatorFullscreenNintendo === "function") {
-          requestEmulatorFullscreenNintendo();
-        }
-      });
-
-    if (controlsBtn)
-      controlsBtn.addEventListener("click", openControlsModal);
+  // Ctrl/Cmd + 1/2/3/F/R — documentados en el popup "Ver Controles".
+  // El motor NO los maneja internamente (se comprobó desarmando el
+  // vendor bundle), así que los implementamos acá. Solo interceptan
+  // el atajo del navegador (ej. Ctrl+R recarga la página) cuando hay
+  // un juego activo — si no, se deja pasar el comportamiento normal.
+  function setupGlobalShortcuts() {
+    document.addEventListener("keydown", function (e) {
+      if (!(e.ctrlKey || e.metaKey) || state.listeningAction) return;
+      if (!state.hasGame) return;
+      switch (e.code) {
+        case "Digit1":
+          e.preventDefault();
+          if (typeof downloadStateNintendo === "function") downloadStateNintendo();
+          break;
+        case "Digit2":
+          e.preventDefault();
+          if (typeof uploadStateNintendo === "function") uploadStateNintendo();
+          break;
+        case "Digit3":
+          e.preventDefault();
+          if (typeof toggleSoundNintendo === "function") toggleSoundNintendo();
+          break;
+        case "KeyF":
+          e.preventDefault();
+          requestFullscreen();
+          break;
+        case "KeyR":
+          e.preventDefault();
+          resetConsole();
+          break;
+      }
+    });
   }
 
   // ---------- Modal de controles (Keyboard / Gamepad) ----------
@@ -840,12 +960,31 @@
 
   function updateGamepadBar(connected) {
     var bar = $("#gamepad-bar");
+    var tag = $("#gamepad-tag");
     var label = $("#gamepad-label");
     if (bar) bar.classList.toggle("is-connected", connected);
+    if (tag) tag.textContent = connected ? "✓ OK" : "⚠ ERROR";
     if (label)
       label.textContent = connected
-        ? "Control detectado"
-        : "Sin control conectado (opcional)";
+        ? "🕹️ Control conectado"
+        : "🕹️ Control no detectado - Conectá un control y presioná cualquier botón";
+  }
+
+  // ---------- Restablecer keymap/gpmap por defecto ----------
+
+  function setupResetDefaults() {
+    var kbBtn = $("#btn-reset-keymap");
+    var gpBtn = $("#btn-reset-gpmap");
+    if (kbBtn)
+      kbBtn.addEventListener("click", function () {
+        saveJSON(KEYMAP_STORAGE_KEY, DEFAULT_KEYMAP);
+        renderKeyboardTab();
+      });
+    if (gpBtn)
+      gpBtn.addEventListener("click", function () {
+        saveJSON(GPMAP_STORAGE_KEY, DEFAULT_GAMEPAD_MAP);
+        renderGamepadTab();
+      });
   }
 
   // ---------- Init ----------
@@ -855,7 +994,9 @@
     setupCarouselNav();
     setupManualLoad();
     setupConsoleControls();
+    setupGlobalShortcuts();
     setupModal();
+    setupResetDefaults();
     loadGameLibrary();
     requestAnimationFrame(pollGamepadBridge);
   }
