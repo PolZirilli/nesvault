@@ -17,8 +17,23 @@
 <body>
 
   <header class="site-header">
-    <div class="logo">NES<span>vault</span></div>
-    <p class="subtitle">Emulador de <strong>Nintendo Entertainment System / Famicom</strong></p>
+    <a class="brand-logo" href="/" title="NESvault" aria-label="NESvault — inicio">
+      <img src="assets/icons/nes.png" alt="NESvault" width="520" height="299">
+    </a>
+    <nav class="vault-nav" aria-label="Familia de emuladores Vault">
+      <a class="vault-nav-icon" href="https://snesvault.netlify.app/" target="_blank" rel="noopener" title="SNESvault"
+        aria-label="Ir a SNESvault">
+        <img src="assets/icons/snes.png" alt="SNESvault" width="520" height="332">
+      </a>
+      <a class="vault-nav-icon" href="https://genvaultapp.netlify.app/" target="_blank" rel="noopener" title="GENvault"
+        aria-label="Ir a GENvault">
+        <img src="assets/icons/genesis.png" alt="GENvault" width="520" height="375">
+      </a>
+      <a class="vault-nav-icon" href="https://dosvault.netlify.app/" target="_blank" rel="noopener" title="DOSVault"
+        aria-label="Ir a DOSVault">
+        <img src="assets/icons/pc.png" alt="DOSVault" width="520" height="296">
+      </a>
+    </nav>
   </header>
 
   <main class="layout">
@@ -57,10 +72,10 @@
 
       <div class="console-controls">
         <button class="btn" id="btn-play" disabled>▶ Comenzar</button>
-        <button class="btn" id="btn-pause" disabled>⏸ Pausar</button>
-        <button class="btn" id="btn-stop" disabled>⏹ Detener</button>
-        <button class="btn btn-accent" id="btn-controls">◈ Ver Controles</button>
+        <button class="btn btn-ghost" id="btn-pause" disabled>⏸ Pausar</button>
+        <button class="btn btn-stop" id="btn-stop" disabled>⏹ Detener</button>
       </div>
+      <button class="btn-controls-toggle" id="btn-controls">◈ Ver Controles</button>
     </section>
 
     <section class="catalog-panel panel">
@@ -70,9 +85,10 @@
           <input type="text" id="search-input" placeholder="🔍 Buscar por nombre o región…" autocomplete="off">
         </div>
         <label class="dropzone" id="dropzone">
-          <span class="dropzone-title">⬆ Cargar Juego</span>
-          <span class="dropzone-hint">Arrastrá y soltá tu archivo acá</span>
-          <span class="dropzone-formats">.nes</span>
+          <span class="dropzone-icon">⬆</span>
+          <span class="dropzone-title">Cargar Juego</span>
+          <span class="dropzone-hint">Arrastrá y soltá tu archivo acá<br>.nes</span>
+          <span class="dropzone-filename" id="dropzone-filename"></span>
           <input type="file" id="rom-file-input" accept=".nes,application/octet-stream">
         </label>
       </div>
@@ -107,20 +123,39 @@
       </div>
       <div class="modal-body">
         <div class="tab-panel is-active" data-tab-panel="keyboard">
-          <div id="keyboard-list"></div>
+          <div class="keymap-columns">
+            <div class="keymap-col">
+              <div class="keymap-col-title">D-Pad</div>
+              <div id="keymap-dpad-list"></div>
+            </div>
+            <div class="keymap-col">
+              <div class="keymap-col-title">Botones</div>
+              <div class="keymap-buttons-grid" id="keymap-buttons-list"></div>
+            </div>
+          </div>
+          <div class="keymap-col-title keymap-extra-title">Start / Select</div>
+          <div class="keymap-extra" id="keymap-extra-list"></div>
           <button class="btn btn-ghost btn-reset-defaults" id="btn-reset-keymap">↺ Restablecer valores por
             defecto</button>
+          <div class="controls-shortcuts">
+            <div class="shortcut-title">Atajos internos</div>
+            <div class="shortcut-inline">
+              <span class="shortcut-chip"><span class="shortcut-label">Guardar partida</span><span
+                  class="shortcut-key">Ctrl+1</span></span>
+              <span class="shortcut-chip"><span class="shortcut-label">Cargar partida</span><span
+                  class="shortcut-key">Ctrl+2</span></span>
+              <span class="shortcut-chip"><span class="shortcut-label">Sonido on/off</span><span
+                  class="shortcut-key">Ctrl+3</span></span>
+              <span class="shortcut-chip"><span class="shortcut-label">Pantalla completa</span><span
+                  class="shortcut-key">Ctrl+F</span></span>
+              <span class="shortcut-chip"><span class="shortcut-label">Reiniciar</span><span
+                  class="shortcut-key">Ctrl+R</span></span>
+            </div>
+          </div>
           <div class="controls-note">
             Player 1 es 100% editable — tocá "Set" y presioná la tecla nueva. Player 2 (numpad) queda fijo por
-            simplicidad.
-            <ul class="shortcuts-list">
-              <li><span>Guardar partida</span><span class="key-badge">Ctrl+1</span></li>
-              <li><span>Cargar partida</span><span class="key-badge">Ctrl+2</span></li>
-              <li><span>Sonido on/off</span><span class="key-badge">Ctrl+3</span></li>
-              <li><span>Pantalla completa</span><span class="key-badge">Ctrl+F</span></li>
-              <li><span>Reiniciar</span><span class="key-badge">Ctrl+R</span></li>
-            </ul>
-            Estos atajos funcionan en toda la página mientras haya un juego cargado y no son remapeables desde acá.
+            simplicidad. Estos atajos funcionan en toda la página mientras haya un juego cargado y no son remapeables
+            desde acá.
           </div>
         </div>
         <div class="tab-panel" data-tab-panel="gamepad">
