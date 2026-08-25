@@ -46,7 +46,7 @@
         "year": 1992,
         "genre": "Run and gun",
         "date": "2026-08-24",
-        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Contra%20Force%20(1992-09-01)(Konami)(US).png",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Contra%20Force%20(1992-09)(Konami)(US).png",
         "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Contra%20Force.nes"
     },
     {
@@ -56,7 +56,7 @@
         "year": 1988,
         "genre": "Platform",
         "date": "2026-08-24",
-        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Donkey%20Kong%20Classics%20(1988)(Nintendo)(US).png",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Donkey%20Kong%20Classics%20(1988-10)(Nintendo)(US).png",
         "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Donkey%20Kong%20Classics.nes"
     },
     {
@@ -216,7 +216,7 @@
         "year": 1987,
         "genre": "Beat 'em up",
         "date": "2026-08-24",
-        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Double%20Dragon%20(1988)(Tradewest)(US)(proto).png",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Double%20Dragon%20(1988)(Technos)(PlayChoice-10).png",
         "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Double%20Dragon.nes"
     },
     {
@@ -266,7 +266,7 @@
         "year": 1989,
         "genre": "Platform",
         "date": "2026-08-24",
-        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/DuckTales%20(1989-09-18)(Capcom)(US).png",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/DuckTales%20(Europe).png",
         "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/DuckTales.nes"
     },
     {
@@ -276,7 +276,7 @@
         "year": 1984,
         "genre": "Racing",
         "date": "2026-08-24",
-        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Excitebike%20(1985-10)(Nintendo)(US)(proto).png",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Excitebike%20(1984-11-30)(Nintendo)(JP-US).png",
         "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Excitebike.nes"
     },
     {
@@ -286,7 +286,7 @@
         "year": 1993,
         "genre": "Platform",
         "date": "2026-08-24",
-        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Kirby%20's%20Adventure%20(1993-03-23)(Nintendo)(US).png",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Kirby's%20Adventure%20(1993)(Nintendo)(CA)(fr).png",
         "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Kirbys%20Adventure.nes"
     },
     {
@@ -296,7 +296,7 @@
         "year": 1988,
         "genre": "Platform",
         "date": "2026-08-24",
-        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Mega%20Man%202%20(1989)(Capcom)(US).png",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Mega%20Man%202%20(1989-06)(Capcom)(US).png",
         "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Mega%20Man%202.nes"
     },
     {
@@ -306,7 +306,7 @@
         "year": 1986,
         "genre": "Action-adventure",
         "date": "2026-08-24",
-        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Metroid%20(1987)(Nintendo)(US)(proto).png",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Metroid%20(1986)(Nintendo)(PlayChoice-10).png",
         "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Metroid.nes"
     },
     {
@@ -316,7 +316,7 @@
         "year": 1991,
         "genre": "Platform",
         "date": "2026-08-24",
-        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Tiny%20Toon%20Adventures%20(1991-09-20)(Konami)(US).png",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Tiny%20Toon%20Adventures%20(1991-12)(Konami)(US).png",
         "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Tiny%20Toon%20Adventures.nes"
     }
 ]
