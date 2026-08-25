@@ -92,6 +92,9 @@
   };
 
   var ACTION_ORDER = ["up", "down", "left", "right", "a", "b", "select", "start"];
+  var DPAD_ACTIONS = ["up", "down", "left", "right"];
+  var BUTTON_ACTIONS = ["a", "b"];
+  var EXTRA_ACTIONS = ["select", "start"];
 
   var state = {
     games: [],
@@ -620,6 +623,8 @@
       alert("NESvault solo acepta archivos .nes");
       return;
     }
+    var filenameEl = $("#dropzone-filename");
+    if (filenameEl) filenameEl.textContent = name;
     setStatusLoading(name);
     var reader = new FileReader();
     reader.addEventListener("load", function () {
@@ -786,30 +791,67 @@
     });
   }
 
-  function renderKeyboardTab() {
-    var list = $("#keyboard-list");
-    if (!list) return;
-    var keymap = currentKeymap();
-    list.innerHTML = ACTION_ORDER.map(function (action) {
-      return (
-        '<div class="key-row">' +
-        '<span class="action">' +
-        ACTION_LABELS[action] +
-        "</span>" +
-        '<span class="binding">' +
-        '<span class="key-badge" data-badge="' +
-        action +
-        '">' +
-        formatKeyCode(keymap[action]) +
-        "</span>" +
-        '<button class="btn btn-set" data-remap="' +
-        action +
-        '">Set</button>' +
-        "</span></div>"
-      );
-    }).join("");
+  function keyRowHTML(action, keymap) {
+    return (
+      '<div class="key-row">' +
+      '<span class="action">' +
+      ACTION_LABELS[action] +
+      "</span>" +
+      '<span class="binding">' +
+      '<span class="key-badge" data-badge="' +
+      action +
+      '">' +
+      formatKeyCode(keymap[action]) +
+      "</span>" +
+      '<button class="btn btn-set" data-remap="' +
+      action +
+      '">Set</button>' +
+      "</span></div>"
+    );
+  }
 
-    $all("[data-remap]", list).forEach(function (btn) {
+  function keyCardHTML(action, keymap) {
+    return (
+      '<div class="keymap-btn-card">' +
+      '<span class="action">' +
+      ACTION_LABELS[action] +
+      "</span>" +
+      '<span class="key-badge" data-badge="' +
+      action +
+      '">' +
+      formatKeyCode(keymap[action]) +
+      "</span>" +
+      '<button class="btn btn-set" data-remap="' +
+      action +
+      '">Set</button>' +
+      "</div>"
+    );
+  }
+
+  function renderKeyboardTab() {
+    var dpadList = $("#keymap-dpad-list");
+    var buttonsList = $("#keymap-buttons-list");
+    var extraList = $("#keymap-extra-list");
+    if (!dpadList && !buttonsList && !extraList) return;
+    var keymap = currentKeymap();
+
+    if (dpadList) {
+      dpadList.innerHTML = DPAD_ACTIONS.map(function (action) {
+        return keyRowHTML(action, keymap);
+      }).join("");
+    }
+    if (buttonsList) {
+      buttonsList.innerHTML = BUTTON_ACTIONS.map(function (action) {
+        return keyCardHTML(action, keymap);
+      }).join("");
+    }
+    if (extraList) {
+      extraList.innerHTML = EXTRA_ACTIONS.map(function (action) {
+        return keyRowHTML(action, keymap);
+      }).join("");
+    }
+
+    $all("[data-remap]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         startListening(btn.getAttribute("data-remap"), btn);
       });
