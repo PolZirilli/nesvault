@@ -82,53 +82,113 @@ img {
 }
 
 /* ---------- Header ---------- */
+/* Sin nombre/bajada de texto a propósito: logo-ícono a la izquierda
+   (control de NES, identidad de este sitio) + navbar de íconos a la
+   derecha (controles de SNES/Genesis/PC — enlazan a los otros sitios
+   de la familia Vault). Mismo concepto en SNESvault/GENvault, pero
+   con su propio control como logo y los otros tres como nav.
+   Íconos: arte de línea detallado (PNG, fondo transparente) recoloreado
+   al azul de la paleta (#182c88) — el logo de la izquierda va sin caja,
+   más grande; los de la derecha van en una caja tipo botón, más chicos. */
 
 .site-header {
-  text-align: center;
-  padding: 2.25rem 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  max-width: 1400px;
+  /* mismo ancho de página que GENvault/SNESvault */
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 1rem;
 }
 
-.site-header .logo {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: clamp(2rem, 5vw, 3.2rem);
-  letter-spacing: 0.04em;
-  color: var(--femi-red);
-  text-shadow: var(--shadow-hard);
+.brand-logo {
+  display: block;
+  flex: none;
+  width: 190px;
+  filter: drop-shadow(3px 3px 0 var(--femi-ink));
+  transition: transform 0.1s ease;
 }
 
-.site-header .logo span {
-  color: var(--femi-maroon);
+.brand-logo:hover {
+  transform: translate(-1px, -1px);
 }
 
-.site-header .subtitle {
-  margin: 0.35rem 0 0;
-  color: var(--text-muted);
-  font-size: 1rem;
-  letter-spacing: 0.02em;
+.brand-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-.site-header .subtitle strong {
-  color: var(--femi-maroon);
+.vault-nav {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.vault-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 62px;
+  padding: 6px 8px;
+  background: var(--panel);
+  border: 2px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: var(--shadow-hard-sm);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.vault-nav-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.vault-nav-icon:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--femi-ink);
+}
+
+.vault-nav-icon:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--femi-ink);
+}
+
+@media (max-width: 560px) {
+  .site-header {
+    justify-content: center;
+  }
+
+  .brand-logo {
+    width: 138px;
+  }
+
+  .vault-nav-icon {
+    width: 72px;
+    height: 48px;
+    padding: 4px 6px;
+  }
 }
 
 /* ---------- Layout ---------- */
 
 .layout {
   display: grid;
-  grid-template-columns: 6fr 4fr;
-  /* 60% consola / 40% catálogo */
-  gap: 1.5rem;
-  max-width: 1760px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  /* misma proporción que GENvault/SNESvault */
+  gap: 22px;
+  max-width: 1400px;
+  /* mismo ancho de página que GENvault/SNESvault */
   margin: 0 auto;
   padding: 0 1.25rem 3rem;
   align-items: start;
 }
 
-@media (max-width: 1020px) {
+@media (max-width: 980px) {
   .layout {
     grid-template-columns: 1fr;
   }
@@ -142,8 +202,8 @@ img {
 }
 
 /* ---------- Consola ---------- */
-/* Columna lateral 70% del ancho (como GENvault/SNESvault, pero
-   proporción 70/30 pedida por Pol). */
+/* Misma proporción de columna que GENvault/SNESvault (~57/43,
+   grid-template-columns: minmax(0,1.15fr) minmax(320px,0.85fr) en .layout). */
 
 .console-panel {
   padding: 1.1rem;
@@ -152,7 +212,7 @@ img {
   min-width: 0;
 }
 
-@media (max-width: 1020px) {
+@media (max-width: 980px) {
   .console-panel {
     position: static;
   }
@@ -337,16 +397,24 @@ img {
   background: var(--femi-grey);
 }
 
+/* Fila de 3 (Comenzar/Pausar/Detener) + botón "Ver Controles" aparte,
+   ancho completo, debajo — mismo patrón que GENvault/SNESvault
+   (.btn-row + .btn-controls-toggle). */
+
 .console-controls {
   margin-top: 0.85rem;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
 }
 
-@media (max-width: 460px) {
+@media (max-width: 480px) {
   .console-controls {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .console-controls #btn-stop {
+    grid-column: span 2;
   }
 }
 
@@ -390,6 +458,16 @@ img {
   color: var(--accent);
 }
 
+.btn.btn-stop {
+  background: var(--panel);
+  color: var(--femi-red);
+  border-color: var(--femi-red);
+}
+
+.btn.btn-stop:hover {
+  background: rgba(227, 34, 11, 0.1);
+}
+
 .btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
@@ -399,6 +477,30 @@ img {
 
 .btn-full {
   grid-column: 1 / -1;
+}
+
+.btn-controls-toggle {
+  display: block;
+  width: 100%;
+  margin-top: 0.55rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.6rem 0.9rem;
+  background: transparent;
+  color: var(--femi-maroon);
+  border: 2px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.btn-controls-toggle:hover {
+  border-color: var(--femi-maroon);
+  color: var(--femi-red);
+  background: rgba(142, 37, 45, 0.06);
 }
 
 /* ---------- Catálogo ---------- */
@@ -443,13 +545,20 @@ img {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 0.15rem;
+  min-height: 78px;
   border: 2px dashed var(--femi-grey);
   border-radius: 8px;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1rem;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.dropzone-icon {
+  font-size: 1rem;
+  margin-bottom: 0.15rem;
 }
 
 .dropzone-title {
@@ -465,12 +574,15 @@ img {
 .dropzone-hint {
   font-size: 0.7rem;
   color: var(--text-muted);
+  line-height: 1.4;
 }
 
-.dropzone-formats {
+.dropzone-filename {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  color: var(--femi-grey);
+  font-size: 0.68rem;
+  color: var(--femi-blue);
+  margin-top: 0.25rem;
+  word-break: break-all;
 }
 
 .dropzone:hover,
@@ -720,14 +832,80 @@ img {
   display: block;
 }
 
+/* ══ Editor de teclado — 2 columnas (D-Pad | Botones), igual que
+   GENvault/SNESvault ══ */
+
+.keymap-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 1.25rem;
+}
+
+.keymap-col-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--femi-maroon);
+  margin-bottom: 0.5rem;
+}
+
+.keymap-extra-title {
+  margin-top: 0.85rem;
+}
+
+.keymap-extra {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem 1.25rem;
+}
+
+@media (max-width: 600px) {
+
+  .keymap-columns,
+  .keymap-extra {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Botones (A/B): grilla de tarjetas en vez de lista */
+.keymap-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.keymap-btn-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.3rem;
+  background: var(--panel-2);
+  border: 2px solid var(--border);
+  border-radius: 7px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.keymap-btn-card.is-listening {
+  border-color: var(--femi-red);
+  background: rgba(227, 34, 11, 0.06);
+}
+
+.keymap-btn-card .key-badge,
+.keymap-btn-card .btn-set {
+  width: 100%;
+}
+
 .key-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.5rem 0;
+  padding: 0.4rem 0;
   border-bottom: 1px solid var(--border);
-  font-size: 0.88rem;
+  font-size: 0.85rem;
 }
 
 .key-row:last-child {
@@ -788,26 +966,52 @@ img {
   padding: 0.5rem;
 }
 
-.controls-note {
+/* ══ Atajos internos — chips en línea, igual que GENvault/SNESvault ══ */
+
+.controls-shortcuts {
   margin-top: 1rem;
   padding-top: 0.85rem;
   border-top: 1px dashed var(--border);
+}
+
+.shortcut-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.shortcut-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.shortcut-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.shortcut-chip .shortcut-label {
+  color: var(--text-muted);
+}
+
+.shortcut-chip .shortcut-key {
+  font-family: var(--font-mono);
+  color: var(--femi-red);
+}
+
+.controls-note {
+  margin-top: 0.85rem;
   font-size: 0.78rem;
   color: var(--text-muted);
   line-height: 1.6;
-}
-
-.shortcuts-list {
-  list-style: none;
-  margin: 0.5rem 0 0;
-  padding: 0;
-}
-
-.shortcuts-list li {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.3rem 0;
-  font-size: 0.82rem;
 }
 
 .gp-status {
