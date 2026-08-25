@@ -184,18 +184,15 @@
   }
 
   function getCarouselColumns() {
-    // Layout 70/30 (consola/catálogo): 4 columnas fijas — con esa
-    // proporción, el panel de catálogo mide ~250-510px de ancho real
-    // en desktop, así que 2 columnas queda solo como último recurso
-    // para pantallas realmente angostas (celulares chicos en el
-    // layout apilado). Se mide .rom-carousel (no .catalog-panel)
-    // porque no tiene padding propio, así el clientWidth que lee JS
-    // coincide exacto con el content-box que usa la @container
-    // query de .rom-page en css/styles.css — si cambiás el
-    // breakpoint (260px), cambiá los dos lugares.
-    var panel = $(".rom-carousel");
-    var w = panel ? panel.clientWidth : window.innerWidth;
-    return w <= 260 ? 2 : 4;
+    // Mismos breakpoints que GENvault/SNESvault: 5 columnas por
+    // defecto, 3 en ventanas ≤1180px, 2 en ventanas ≤620px — sobre
+    // el ancho de la VENTANA (no del contenedor), igual que sus
+    // media queries en css/styles.css (.rom-page). Si cambiás estos
+    // números, cambiá los dos lugares.
+    var w = window.innerWidth;
+    if (w <= 620) return 2;
+    if (w <= 1180) return 3;
+    return 5;
   }
 
   function pageSize() {
@@ -364,12 +361,11 @@
         renderCarousel();
       });
 
-    // Se observa .rom-carousel (no window.resize): en el layout lado
-    // a lado su ancho cambia con breakpoints propios, no 1:1 con el
-    // ancho de la ventana. Mismo elemento que mide getCarouselColumns().
-    var panel = $(".rom-carousel");
+    // getCarouselColumns() ahora depende del ancho de la ventana
+    // (mismos breakpoints que GENvault/SNESvault), así que basta con
+    // escuchar window resize.
     var resizeTimer = null;
-    function onPanelResize() {
+    function onWindowResize() {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
         var newCols = getCarouselColumns();
@@ -379,12 +375,7 @@
         }
       }, 150);
     }
-    if (panel && typeof ResizeObserver !== "undefined") {
-      new ResizeObserver(onPanelResize).observe(panel);
-    } else {
-      // Fallback para navegadores sin ResizeObserver
-      window.addEventListener("resize", onPanelResize);
-    }
+    window.addEventListener("resize", onWindowResize);
   }
 
   // ---------- Carga de ROM / motor ----------
