@@ -78,19 +78,11 @@
       <button class="btn-controls-toggle" id="btn-controls">◈ Ver Controles</button>
     </section>
 
-    <section class="catalog-panel panel">
+    <section class="catalog-panel">
       <h2 class="section-title">◈ Catálogo</h2>
-      <div class="catalog-toolbar">
-        <div class="search-box">
-          <input type="text" id="search-input" placeholder="🔍 Buscar por nombre o región…" autocomplete="off">
-        </div>
-        <label class="dropzone" id="dropzone">
-          <span class="dropzone-icon">⬆</span>
-          <span class="dropzone-title">Cargar Juego</span>
-          <span class="dropzone-hint">Arrastrá y soltá tu archivo acá<br>.nes</span>
-          <span class="dropzone-filename" id="dropzone-filename"></span>
-          <input type="file" id="rom-file-input" accept=".nes,application/octet-stream">
-        </label>
+
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="🔍 Buscar por nombre o región…" autocomplete="off">
       </div>
 
       <div class="rom-carousel">
@@ -102,6 +94,14 @@
         <div class="carousel-dots" id="carousel-dots"></div>
         <button class="btn arrow" id="carousel-next" aria-label="Página siguiente">›</button>
       </div>
+
+      <label class="dropzone" id="dropzone">
+        <span class="dropzone-icon">⬆</span>
+        <span class="dropzone-title">Cargar Juego</span>
+        <span class="dropzone-hint">Arrastrá y soltá tu archivo acá<br>.nes</span>
+        <span class="dropzone-filename" id="dropzone-filename"></span>
+        <input type="file" id="rom-file-input" accept=".nes,application/octet-stream">
+      </label>
     </section>
 
   </main>
