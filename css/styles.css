@@ -504,24 +504,22 @@ img {
 }
 
 /* ---------- Catálogo ---------- */
+/* Sin caja/borde propio a propósito, igual que GENvault/SNESvault:
+   el panel de catálogo es un simple contenedor flex-column flotando
+   sobre el fondo de la página — son sus hijos (buscador, rom-card,
+   dropzone) los que tienen su propio fondo/borde. Solo la consola
+   mantiene la caja con borde. */
 
 .catalog-panel {
-  padding: 1.1rem 1.1rem 1.35rem;
-  min-width: 0;
-}
-
-.catalog-toolbar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
 }
 
 .search-box {
   position: relative;
-  flex: 1 1 240px;
+  width: 100%;
 }
 
 .search-box input {
@@ -541,7 +539,7 @@ img {
 }
 
 .dropzone {
-  flex: none;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -602,24 +600,23 @@ img {
 
 .rom-carousel {
   position: relative;
-  /* Sin padding propio a propósito: la container query de abajo
-     mide el content-box de ESTE elemento, y js/app.js mide su
-     clientWidth con getCarouselColumns() — si este elemento tuviera
-     padding, ambas medidas dejarían de coincidir en el límite del
-     breakpoint (border-box vs content-box). */
-  container-type: inline-size;
-  container-name: catalog;
 }
 
 .rom-page {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  /* 4 columnas x 2 filas = 8 por página */
+  grid-template-columns: repeat(5, 1fr);
+  /* 5 columnas x 2 filas = 10 por página, igual que GENvault/SNESvault */
   grid-auto-rows: 1fr;
   gap: 0.7rem;
 }
 
-@container catalog (max-width: 260px) {
+@media (max-width: 1180px) {
+  .rom-page {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 620px) {
   .rom-page {
     grid-template-columns: repeat(2, 1fr);
   }
