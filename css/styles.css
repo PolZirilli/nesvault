@@ -98,9 +98,8 @@ img {
   flex-wrap: wrap;
   gap: 0.85rem;
   max-width: 1400px;
-  /* mismo ancho de página que GENvault/SNESvault */
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 1rem;
+  padding: 0rem 1.25rem;
 }
 
 .brand-logo {
@@ -109,10 +108,6 @@ img {
   width: 190px;
   filter: drop-shadow(3px 3px 0 var(--femi-ink));
   transition: transform 0.1s ease;
-}
-
-.brand-logo:hover {
-  transform: translate(-1px, -1px);
 }
 
 .brand-logo img {
@@ -132,13 +127,9 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 96px;
-  height: 62px;
-  padding: 6px 8px;
-  background: var(--panel);
-  border: 2px solid var(--border-strong);
-  border-radius: 8px;
-  box-shadow: var(--shadow-hard-sm);
+  width: 110px;
+  height: 110px;
+  padding: 4px 0px;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
@@ -150,12 +141,12 @@ img {
 
 .vault-nav-icon:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0 var(--femi-ink);
+  /*box-shadow: 4px 4px 0 var(--femi-ink);*/
 }
 
 .vault-nav-icon:active {
   transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 var(--femi-ink);
+  /*box-shadow: 4px 4px 0 var(--femi-ink);*/
 }
 
 @media (max-width: 560px) {
