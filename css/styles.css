@@ -106,7 +106,7 @@ img {
   display: block;
   flex: none;
   width: 190px;
-  filter: drop-shadow(3px 3px 0 var(--femi-ink));
+  filter: drop-shadow(3px 3px 0 var(--femi-maroon));
   transition: transform 0.1s ease;
 }
 
