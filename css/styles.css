@@ -96,9 +96,9 @@ img {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.85rem;
   max-width: 1400px;
-  margin: 0 auto;
+  gap: 0.85rem;
+  margin: 1.25rem auto;
   padding: 0rem 1.25rem;
 }
 
