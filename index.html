@@ -1,16 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
   <meta charset="UTF-8">
-  <title>NESvault — Emulador NES/Famicom en el navegador</title>
-  <meta name="description"
-    content="NESvault — emulador de Nintendo Entertainment System / Famicom en el navegador, motor Nintendo.js.">
-  <meta name="keywords" content="nes, famicom, nintendo, emulator, retro, javascript">
-  <meta name="theme-color" content="#8e252d">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <link rel="icon" type="image/svg+xml"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='10' y='6' width='30' height='20' rx='2' fill='%238e252d'/%3E%3Crect x='6' y='24' width='44' height='30' rx='3' fill='%23e3220b'/%3E%3Ccircle cx='28' cy='42' r='7' fill='%23f5f4ec'/%3E%3C/svg%3E">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NESvault — Nintendo Entertainment System / Famicom</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -42,144 +36,153 @@
 
   <main class="layout">
 
-    <section class="console-panel panel">
+    <!-- ══ COLUMNA CONSOLA ══ -->
+    <section class="console-col">
+      <div class="console-body">
 
-      <div class="screen-bezel">
-        <button class="fullscreen-btn" id="btn-fullscreen" title="Pantalla completa"
-          aria-label="Pantalla completa">⛶</button>
-        <div id="game"></div>
-        <div class="scanlines"></div>
-        <div class="boot-placeholder">
-          <svg class="cart-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="10" y="6" width="30" height="20" rx="2" fill="#8e252d" />
-            <rect x="14" y="10" width="22" height="4" fill="#f5f4ec" />
-            <rect x="6" y="24" width="44" height="30" rx="3" fill="#e3220b" />
-            <rect x="6" y="24" width="44" height="8" fill="#31181a" opacity="0.25" />
-            <circle cx="28" cy="42" r="7" fill="#f5f4ec" />
-            <circle cx="28" cy="42" r="3" fill="#31181a" />
-          </svg>
-          <span>Elegí un juego del catálogo<br>o cargá tu propio .nes</span>
+        <div class="screen-bezel">
+          <div class="screen-wrap" id="screenWrap">
+            <canvas id="splashCanvas" width="256" height="224"></canvas>
+            <div id="emuContainer"></div>
+            <div id="loaderOverlay">
+              <div class="spin"></div>
+              <p id="loaderText">CARGANDO JUEGO...</p>
+            </div>
+            <button class="btn-fullscreen" id="btnFullscreen" title="Fullscreen">⛶</button>
+          </div>
+          <div class="screen-label">NES / FAMICOM · 60Hz · NTSC</div>
         </div>
-      </div>
 
-      <div class="system-info">NES / Famicom · 60Hz · NTSC</div>
+        <div class="status-bar">
+          <div class="led" id="led"></div>
+          <span id="statusText"></span>
+          <span class="fps-counter" id="fpsCounter"></span>
+        </div>
 
-      <div class="status-bar" id="status-bar">
-        <span class="status-dot"></span>
-        <span class="status-game" id="status-game">Sin juego cargado</span>
-      </div>
+        <div id="errorBox">
+          <strong>⚠ ERROR</strong>
+          <span id="errorMsg"></span>
+          <code id="errorHint"></code>
+        </div>
 
-      <div class="gamepad-bar" id="gamepad-bar">
-        <span class="gamepad-tag" id="gamepad-tag">⚠ ERROR</span>
-        <span id="gamepad-label">🕹️ Control no detectado - Conectá un control y presioná cualquier botón</span>
-      </div>
+        <div class="gamepad-bar">
+          <span>🕹️</span>
+          <span id="gamepadStatus">Control no detectado - Conecte un control y presione cualquier boton</span>
+        </div>
 
-      <div class="console-controls">
-        <button class="btn" id="btn-play" disabled>▶ Comenzar</button>
-        <button class="btn btn-ghost" id="btn-pause" disabled>⏸ Pausar</button>
-        <button class="btn btn-stop" id="btn-stop" disabled>⏹ Detener</button>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnPlay" disabled>▶ COMENZAR</button>
+          <button class="btn btn-secondary" id="btnPause" disabled>⏸ PAUSAR</button>
+          <button class="btn btn-danger" id="btnStop" disabled>⏹ DETENER</button>
+        </div>
+
+        <button class="btn-controls-toggle" id="btnControls">◈ Ver Controles</button>
+
       </div>
-      <button class="btn-controls-toggle" id="btn-controls">◈ Ver Controles</button>
     </section>
 
-    <section class="catalog-panel">
-      <h2 class="section-title">◈ Catálogo</h2>
+    <!-- ══ COLUMNA ROMS — buscador + carousel (máx. 2 filas) + carga ══ -->
+    <aside class="roms-col">
+      <h2 class="roms-heading">◈ Catálogo</h2>
 
-      <div class="search-box">
-        <input type="text" id="search-input" placeholder="🔍 Buscar por nombre o región…" autocomplete="off">
+      <div class="rom-search">
+        <span class="rom-search-icon">🔍</span>
+        <input type="text" id="romSearch" placeholder="Buscar juego...">
       </div>
 
       <div class="rom-carousel">
-        <div class="rom-page" id="rom-grid"></div>
+        <div class="rom-track" id="romTrack">
+          <!-- páginas de tarjetas generadas por js/app.js a partir de ROM_LIBRARY -->
+        </div>
       </div>
 
-      <div class="carousel-nav">
-        <button class="btn arrow" id="carousel-prev" aria-label="Página anterior">‹</button>
-        <div class="carousel-dots" id="carousel-dots"></div>
-        <button class="btn arrow" id="carousel-next" aria-label="Página siguiente">›</button>
+      <div class="rom-pagination">
+        <button class="page-arrow" id="pagePrev">‹</button>
+        <div class="page-dots" id="pageDots"></div>
+        <button class="page-arrow" id="pageNext">›</button>
       </div>
 
-      <label class="dropzone" id="dropzone">
-        <span class="dropzone-icon">⬆</span>
-        <span class="dropzone-title">Cargar Juego</span>
-        <span class="dropzone-hint">Arrastrá y soltá tu archivo acá<br>.nes</span>
-        <span class="dropzone-filename" id="dropzone-filename"></span>
-        <input type="file" id="rom-file-input" accept=".nes,application/octet-stream">
-      </label>
-    </section>
+      <div class="file-drop" id="fileDrop">
+        <span class="drop-icon">⬆</span>
+        <span class="drop-title">CARGAR JUEGO</span>
+        <span class="drop-sub">Arrastrá y soltá tu archivo acá<br>.nes</span>
+        <span class="rom-name" id="romName"></span>
+        <input type="file" id="romInput" accept=".nes">
+      </div>
+    </aside>
 
   </main>
 
-  <footer class="site-footer">
-    NESvault · Nintendo Entertainment System / Famicom Emulator · <a href="https://github.com/lrusso/Nintendo"
-      target="_blank" rel="noopener">Nintendo.js</a> · Gamepad API
-  </footer>
+  <!-- POPUP DE CONTROLES -->
+  <div id="controlsOverlay" class="controls-overlay" aria-hidden="true">
+    <div class="controls-popup">
 
-  <div class="modal-overlay" id="controls-modal">
-    <div class="modal">
-      <div class="modal-head">
-        <h2>◈ Controles</h2>
-        <button class="modal-close" data-close-modal aria-label="Cerrar">✕</button>
+      <div class="controls-popup-header">
+        <span>◈ CONTROLES</span>
+        <button class="controls-close" id="btnControlsClose">✕</button>
       </div>
-      <div class="tabs">
-        <button class="is-active" data-tab="keyboard">⌨ Teclado</button>
-        <button data-tab="gamepad">🎮 Control</button>
+
+      <div class="ctrl-tabs">
+        <button class="ctrl-tab active" data-panel="panelKeyboard">⌨ TECLADO</button>
+        <button class="ctrl-tab" data-panel="panelGamepad">🎮 CONTROL</button>
       </div>
-      <div class="modal-body">
-        <div class="tab-panel is-active" data-tab-panel="keyboard">
-          <div class="keymap-columns">
-            <div class="keymap-col">
-              <div class="keymap-col-title">D-Pad</div>
-              <div id="keymap-dpad-list"></div>
-            </div>
-            <div class="keymap-col">
-              <div class="keymap-col-title">Botones</div>
-              <div class="keymap-buttons-grid" id="keymap-buttons-list"></div>
-            </div>
+
+      <div class="ctrl-panel active" id="panelKeyboard">
+        <div class="gpmap-header">
+          <span class="gpmap-device">Editá las teclas a tu gusto</span>
+          <button class="gpmap-reset-btn" id="btnKeymapReset">↺ Reset defaults</button>
+        </div>
+        <div class="gpmap-hint">Presiona <strong>Set</strong> junto a una acción, y luego presiona la tecla que querés
+          usar. Se aplica la próxima vez que cargues un ROM.</div>
+
+        <div class="keymap-columns">
+          <div class="keymap-col">
+            <div class="keymap-col-title">D-Pad</div>
+            <div class="gpmap-list" id="keymapDpadList"></div>
           </div>
-          <div class="keymap-col-title keymap-extra-title">Start / Select</div>
-          <div class="keymap-extra" id="keymap-extra-list"></div>
-          <button class="btn btn-ghost btn-reset-defaults" id="btn-reset-keymap">↺ Restablecer valores por
-            defecto</button>
-          <div class="controls-shortcuts">
-            <div class="shortcut-title">Atajos internos</div>
-            <div class="shortcut-inline">
-              <span class="shortcut-chip"><span class="shortcut-label">Guardar partida</span><span
-                  class="shortcut-key">Ctrl+1</span></span>
-              <span class="shortcut-chip"><span class="shortcut-label">Cargar partida</span><span
-                  class="shortcut-key">Ctrl+2</span></span>
-              <span class="shortcut-chip"><span class="shortcut-label">Sonido on/off</span><span
-                  class="shortcut-key">Ctrl+3</span></span>
-              <span class="shortcut-chip"><span class="shortcut-label">Pantalla completa</span><span
-                  class="shortcut-key">Ctrl+F</span></span>
-              <span class="shortcut-chip"><span class="shortcut-label">Reiniciar</span><span
-                  class="shortcut-key">Ctrl+R</span></span>
-            </div>
-          </div>
-          <div class="controls-note">
-            Player 1 es 100% editable — tocá "Set" y presioná la tecla nueva. Player 2 (numpad) queda fijo por
-            simplicidad. Estos atajos funcionan en toda la página mientras haya un juego cargado y no son remapeables
-            desde acá.
+          <div class="keymap-col">
+            <div class="keymap-col-title">Botones</div>
+            <div class="keymap-buttons-grid" id="keymapButtonsList"></div>
           </div>
         </div>
-        <div class="tab-panel" data-tab-panel="gamepad">
-          <div class="gp-status" id="gp-status-inner">
-            <span class="gp-dot"></span>
-            <span>Conectá un control y presioná cualquier botón para activarlo.</span>
-          </div>
-          <div id="gamepad-list"></div>
-          <button class="btn btn-ghost btn-reset-defaults" id="btn-reset-gpmap">↺ Restablecer valores por
-            defecto</button>
-          <div class="controls-note">
-            El control físico se traduce a las mismas teclas del Player 1 — si remapeás el teclado, el control sigue
-            funcionando igual.
+
+        <div class="keymap-col-title keymap-extra-title">START / SELECT</div>
+        <div class="gpmap-list keymap-extra" id="keymapExtraList"></div>
+
+        <div class="controls-shortcuts">
+          <div class="shortcut-title">Atajos internos (Nintendo.js)</div>
+          <div class="shortcut-inline">
+            <span class="shortcut-chip"><span class="shortcut-label">Guardar estado</span><span
+                class="shortcut-key">Ctrl/Cmd+1</span></span>
+            <span class="shortcut-chip"><span class="shortcut-label">Cargar estado</span><span
+                class="shortcut-key">Ctrl/Cmd+2</span></span>
+            <span class="shortcut-chip"><span class="shortcut-label">Silenciar</span><span
+                class="shortcut-key">Ctrl/Cmd+3</span></span>
+            <span class="shortcut-chip"><span class="shortcut-label">Pantalla completa</span><span
+                class="shortcut-key">Ctrl/Cmd+F</span></span>
+            <span class="shortcut-chip"><span class="shortcut-label">Reiniciar</span><span
+                class="shortcut-key">Ctrl/Cmd+R</span></span>
           </div>
         </div>
       </div>
+
+      <div class="ctrl-panel" id="panelGamepad">
+        <div class="gpmap-header">
+          <span id="gpName" class="gpmap-device">No gamepad connected</span>
+          <button class="gpmap-reset-btn" id="btnGPReset">↺ Reset defaults</button>
+        </div>
+        <div class="gpmap-hint">Presiona <strong>Set</strong> junto a una acción, y luego presiona el botón físico de tu
+          gamepad. Se aplica la próxima vez que cargues un ROM.</div>
+        <div id="gpMapList" class="gpmap-list"></div>
+      </div>
+
     </div>
   </div>
 
-  <script src="js/vendor/Nintendo.min.js"></script>
+  <footer>NESvault · Nintendo Entertainment System / Famicom Emulator · Nintendo.js (FCEUmm) · Gamepad API</footer>
+
+  <script src="js/Nintendo.min.js"></script>
+  <script src="js/gamepad-mappings.js"></script>
   <script src="js/app.js"></script>
 </body>
 
