@@ -318,5 +318,85 @@
         "date": "2026-08-24",
         "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Tiny%20Toon%20Adventures%20(1991-12)(Konami)(US).png",
         "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Tiny%20Toon%20Adventures.nes"
+    },
+    {
+        "id": "adventure-island",
+        "name": "Adventure Island",
+        "developer": "Hudson Soft",
+        "year": 1988,
+        "genre": "Platform",
+        "date": "2026-08-24",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Adventure%20Island%20(1988-12)(Hudson%20Soft)(US).png",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Adventure%20Island.nes"
+    },
+    {
+        "id": "d-j-boy",
+        "name": "D.J. Boy",
+        "developer": "Video System",
+        "year": 1989,
+        "genre": "Platform",
+        "date": "2026-08-24",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/D.J.%20Boy%20(1990-12)(Video%20System)(US).png",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/D.J.%20Boy.nes"
+    },
+    {
+        "id": "ikki",
+        "name": "Ikki",
+        "developer": "Sunsoft",
+        "year": 1985,
+        "genre": "Action",
+        "date": "2026-08-24",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Ikki%20(1986-08-08)(Sunsoft)(JP).png",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Ikki.nes"
+    },
+    {
+        "id": "little-samson",
+        "name": "Little Samson",
+        "developer": "Culture Brain",
+        "year": 1993,
+        "genre": "Platform",
+        "date": "2026-08-24",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Little%20Samson%20(1992)(Culture%20Brain)(US).png",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Little%20Samson.nes"
+    },
+    {
+        "id": "lode-runner",
+        "name": "Lode Runner",
+        "developer": "Broderbund",
+        "year": 1984,
+        "genre": "Platform",
+        "date": "2026-08-24",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Lode%20Runner%20(1989)(Broderbund)(US).png",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Lode%20Runner.nes"
+    },
+    {
+        "id": "magmax",
+        "name": "Magmax",
+        "developer": "Cammax",
+        "year": 1985,
+        "genre": "Shoot 'em up",
+        "date": "2026-08-24",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Magmax%20(1988-11-18)(Cammax)(EU).png",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Magmax.nes"
+    },
+    {
+        "id": "othello",
+        "name": "Othello",
+        "developer": "Hitachi",
+        "year": 1983,
+        "genre": "Board",
+        "date": "2026-08-24",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Othello%20(1988-11-10)(Hitachi)(JP).png",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Othello.nes"
+    },
+    {
+        "id": "seirei-densetsu-lickle",
+        "name": "Seirei Densetsu Lickle",
+        "developer": "Sunsoft",
+        "year": 1989,
+        "genre": "Action",
+        "date": "2026-08-24",
+        "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Seirei%20Densetsu%20Lickle%20(1989-11-24)(Sunsoft)(JP).png",
+        "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Seirei%20Densetsu%20Lickle.nes"
     }
 ]
