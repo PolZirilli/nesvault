@@ -429,10 +429,21 @@ function mountEmulator(romBuffer, romName) {
     emuContainer.style.display = 'block';
     showLoader('LOADING ROM...');
 
+    // GOTCHA CRÍTICO (documentado en el proyecto): Nintendo.min.js necesita que
+    // el `name` de embedNintendo() tenga pinta de nombre de archivo real (.nes),
+    // si no `cbStarted` nunca dispara y queda colgado en "LOADING ROM...".
+    // romName acá puede ser el nombre "lindo" del catálogo (rom.name en
+    // games.json, ej. "Zelda II: The Adventure of Link", sin extensión) —
+    // se arma un nombre de motor aparte que sí cumple el formato, sin tocar
+    // el romName que se usa para mostrar en la UI.
+    const engineName = /\.nes$/i.test(romName)
+        ? romName
+        : romName.replace(/[\\/:*?"<>|]/g, '') + '.nes';
+
     try {
         embedNintendo({
             container: 'emuContainer',
-            name: romName,
+            name: engineName,
             rom: romBuffer,
             soundEnabled: true,
             showMobileControls: false,
