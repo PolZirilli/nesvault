@@ -35,6 +35,9 @@ const DEAD = 0.45;
 const GAMES_JSON_URL = 'data/games.json';
 let ROM_LIBRARY = [];
 let catalogErrorMsg = null;
+// 'empty' | 'failed' | null — para poder recalcular catalogErrorMsg en el
+// idioma correcto si el usuario cambia ES/EN después de cargar el catálogo.
+let catalogErrorKind = null;
 
 function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, c => ({
@@ -49,11 +52,13 @@ async function loadGameLibrary() {
         const data = await res.json();
         if (!Array.isArray(data)) throw new Error('data/games.json debe ser un array de juegos.');
         ROM_LIBRARY = data.filter(g => g && typeof g.name === 'string' && typeof g.url === 'string');
-        catalogErrorMsg = ROM_LIBRARY.length ? null : 'Todavía no hay ROMs cargados en el catálogo.';
+        catalogErrorKind = ROM_LIBRARY.length ? null : 'empty';
+        catalogErrorMsg = catalogErrorKind ? t('catalog_empty') : null;
     } catch (err) {
         console.error('No se pudo cargar data/games.json:', err);
         ROM_LIBRARY = [];
-        catalogErrorMsg = 'No se pudo cargar el catálogo de ROMs (data/games.json). Podés cargar tu ROM manualmente abajo.';
+        catalogErrorKind = 'failed';
+        catalogErrorMsg = t('catalog_load_failed');
     }
     renderCarousel();
 }
@@ -131,8 +136,8 @@ function renderCarousel() {
     // Sin resultados — catálogo vacío, falló la carga, o la búsqueda no matcheó nada.
     if (!visible.length) {
         const msg = !ROM_LIBRARY.length
-            ? (catalogErrorMsg || 'No hay ROMs en el catálogo.')
-            : `No se encontraron juegos para "${searchQuery}".`;
+            ? (catalogErrorMsg || t('catalog_empty_fallback'))
+            : `${t('catalog_no_results_prefix')}${searchQuery}".`;
         track.innerHTML = `<div class="rom-page rom-empty-page"><p class="rom-empty">${escapeHtml(msg)}</p></div>`;
         track.style.transform = 'translateX(0)';
         if (paginationEl) paginationEl.style.display = 'none';
@@ -207,14 +212,14 @@ window.addEventListener('resize', () => {
 //  sin botones C/X/Y/Z ni Mode como en Genesis/SNES.
 // ════════════════════════════════════════════
 const ACTIONS = [
-    { id: 'up', label: 'D-Pad Up' },
-    { id: 'down', label: 'D-Pad Down' },
-    { id: 'left', label: 'D-Pad Left' },
-    { id: 'right', label: 'D-Pad Right' },
-    { id: 'a', label: 'Button A' },
-    { id: 'b', label: 'Button B' },
-    { id: 'start', label: 'Start' },
-    { id: 'select', label: 'Select' },
+    { id: 'up', labelKey: 'action_up' },
+    { id: 'down', labelKey: 'action_down' },
+    { id: 'left', labelKey: 'action_left' },
+    { id: 'right', labelKey: 'action_right' },
+    { id: 'a', labelKey: 'action_a' },
+    { id: 'b', labelKey: 'action_b' },
+    { id: 'start', labelKey: 'action_start' },
+    { id: 'select', labelKey: 'action_select' },
 ];
 const DPAD_IDS = ['up', 'down', 'left', 'right'];
 const BUTTON_IDS = ['a', 'b'];
@@ -287,7 +292,7 @@ function drawSplash() {
     for (let y = 0; y < h; y += 16) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
     for (let x = 0; x < w; x += 32) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
     ctx.fillStyle = '#c68a6e'; ctx.font = '7px Orbitron, sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('LOAD A ROM TO START', w / 2, h / 2);
+    ctx.fillText(t('splash_text'), w / 2, h / 2);
 }
 
 // ════════════════════════════════════════════
@@ -378,13 +383,13 @@ function stopGPPoll() {
 
 window.addEventListener('gamepadconnected', e => {
     const el = document.getElementById('gamepadStatus');
-    el.textContent = '🎮 Connected: ' + e.gamepad.id.substring(0, 55);
+    el.textContent = t('gamepad_connected_prefix') + e.gamepad.id.substring(0, 55);
     el.classList.add('connected');
     renderGPMap();
 });
 window.addEventListener('gamepaddisconnected', () => {
     const el = document.getElementById('gamepadStatus');
-    el.textContent = 'Gamepad disconnected';
+    el.textContent = t('gamepad_disconnected');
     el.classList.remove('connected');
     stopGPPoll();
 });
@@ -410,7 +415,7 @@ function toggleFullscreen() {
 function updateFullscreenBtn() {
     const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
     btnFullscreen.textContent = isFS ? '✕' : '⛶';
-    btnFullscreen.title = isFS ? 'Exit Fullscreen' : 'Fullscreen';
+    btnFullscreen.title = isFS ? t('exit_fullscreen_title') : t('fullscreen_title');
 }
 
 // ════════════════════════════════════════════
@@ -421,13 +426,13 @@ function mountEmulator(romBuffer, romName) {
     if (typeof embedNintendo === 'undefined') {
         showError('Engine not found: js/Nintendo.min.js',
             '→ Download from: https://github.com/lrusso/Nintendo/raw/main/Nintendo.min.js');
-        setStatus('Engine not found', 'err'); return;
+        setStatus(t('status_engine_not_found'), 'err'); return;
     }
 
     lastROMName = romName;
     splash.style.display = 'none';
     emuContainer.style.display = 'block';
-    showLoader('LOADING ROM...');
+    showLoader(t('loader_loading_rom'));
 
     // GOTCHA CRÍTICO (documentado en el proyecto): Nintendo.min.js necesita que
     // el `name` de embedNintendo() tenga pinta de nombre de archivo real (.nes),
@@ -458,7 +463,7 @@ function mountEmulator(romBuffer, romName) {
                 emuRunning = true;
                 paused = false;
                 romNameEl.textContent = '▸ ' + romName;
-                setStatus('Playing: ' + romName, 'on');
+                setStatus(t('status_playing_prefix') + romName, 'on');
                 enableButtons(false, true, true);
                 startFPS();
                 startGPPoll();
@@ -468,8 +473,8 @@ function mountEmulator(romBuffer, romName) {
         hideLoader();
         splash.style.display = 'block';
         emuContainer.style.display = 'none';
-        setStatus('Error loading ROM', 'err');
-        showError('Could not start emulator: ' + e.message);
+        setStatus(t('status_error_loading'), 'err');
+        showError(t('err_could_not_start') + e.message);
     }
 }
 
@@ -481,7 +486,7 @@ function handleROMFile(file) {
     hideError();
     const reader = new FileReader();
     reader.onload = ev => mountEmulator(ev.target.result, file.name);
-    reader.onerror = () => showError('Could not read the ROM file.');
+    reader.onerror = () => showError(t('err_could_not_read'));
     reader.readAsArrayBuffer(file);
 }
 
@@ -496,11 +501,11 @@ drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('
 
 function loadPresetROM(url, displayName) {
     if (!url) return;
-    hideError(); setStatus('Fetching ROM...', null);
+    hideError(); setStatus(t('status_fetching'), null);
     fetch(url)
         .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
         .then(buf => mountEmulator(buf, displayName || url.split('/').pop()))
-        .catch(err => { showError('Could not load preset ROM.', err.message); setStatus('Load error', 'err'); });
+        .catch(err => { showError(t('err_could_not_load_preset'), err.message); setStatus(t('status_load_error'), 'err'); });
 }
 
 // ════════════════════════════════════════════
@@ -510,8 +515,8 @@ document.getElementById('btnPause').onclick = () => {
     if (!emuRunning || paused) return;
     paused = true; stopFPS(); stopGPPoll();
     ledEl.className = 'led';
-    setStatus('Paused — press ▶ PLAY to continue', null);
-    document.getElementById('btnPause').textContent = '⏸ PAUSED';
+    setStatus(t('status_paused'), null);
+    document.getElementById('btnPause').textContent = t('btn_pause_active');
     enableButtons(true, false, true);
     try { emuContainer.querySelector('canvas')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); } catch (_) { }
 };
@@ -519,8 +524,8 @@ document.getElementById('btnPause').onclick = () => {
 document.getElementById('btnPlay').onclick = () => {
     if (!emuRunning || !paused) return;
     paused = false;
-    setStatus('Playing: ' + lastROMName, 'on');
-    document.getElementById('btnPause').textContent = '⏸ PAUSE';
+    setStatus(t('status_playing_prefix') + lastROMName, 'on');
+    document.getElementById('btnPause').textContent = t('btn_pause');
     enableButtons(false, true, true); startFPS(); startGPPoll();
     try { emuContainer.querySelector('canvas')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); } catch (_) { }
 };
@@ -570,7 +575,7 @@ let listeningFor = null, listenInterval = null;
 function renderGPMap() {
     const gp = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(g => g?.connected);
     const gpNameEl = document.getElementById('gpName');
-    if (gpNameEl) gpNameEl.textContent = gp ? gp.id.substring(0, 60) : 'No gamepad connected';
+    if (gpNameEl) gpNameEl.textContent = gp ? gp.id.substring(0, 60) : t('gamepad_no_connected');
     const list = document.getElementById('gpMapList');
     if (!list) return;
     list.innerHTML = '';
@@ -579,9 +584,9 @@ function renderGPMap() {
         const row = document.createElement('div');
         row.className = 'gpmap-row'; row.id = 'gprow-' + action.id;
         row.innerHTML = `
-            <span class="gpmap-action">${action.label}</span>
-            <span class="gpmap-btn" id="gpbtn-${action.id}">${btnIndex !== undefined ? 'Button ' + btnIndex : '—'}</span>
-            <button class="gpmap-set" data-action="${action.id}">Set</button>`;
+            <span class="gpmap-action">${t(action.labelKey)}</span>
+            <span class="gpmap-btn" id="gpbtn-${action.id}">${btnIndex !== undefined ? t('gpmap_button_prefix') + btnIndex : '—'}</span>
+            <button class="gpmap-set" data-action="${action.id}">${t('btn_set')}</button>`;
         list.appendChild(row);
     });
     list.querySelectorAll('.gpmap-set').forEach(btn => btn.addEventListener('click', () => startListen(btn.dataset.action)));
@@ -595,8 +600,8 @@ function startListen(actionId) {
     const btnEl = document.getElementById('gpbtn-' + actionId);
     const setBtn = row.querySelector('.gpmap-set');
     row.classList.add('gpmap-listening');
-    btnEl.textContent = 'Press button...';
-    setBtn.textContent = 'Cancel';
+    btnEl.textContent = t('press_button_full');
+    setBtn.textContent = t('btn_cancel');
     setBtn.onclick = cancelListen;
     listenInterval = setInterval(() => {
         const gp = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(g => g?.connected);
@@ -626,9 +631,9 @@ let listeningForKey = null;
 function keymapRowHTML(action) {
     return `
         <div class="gpmap-row" id="kmrow-${action.id}">
-            <span class="gpmap-action">${action.label}</span>
+            <span class="gpmap-action">${t(action.labelKey)}</span>
             <span class="gpmap-btn" id="kmbtn-${action.id}">${keyLabel(keymap[action.id])}</span>
-            <button class="gpmap-set" data-action="${action.id}">Set</button>
+            <button class="gpmap-set" data-action="${action.id}">${t('btn_set')}</button>
         </div>`;
 }
 
@@ -639,7 +644,7 @@ function keymapButtonCardHTML(action) {
         <div class="keymap-btn-card" id="kmrow-${action.id}">
             <span class="keymap-btn-label">${shortLabel}</span>
             <span class="gpmap-btn" id="kmbtn-${action.id}">${keyLabel(keymap[action.id])}</span>
-            <button class="gpmap-set" data-action="${action.id}">Set</button>
+            <button class="gpmap-set" data-action="${action.id}">${t('btn_set')}</button>
         </div>`;
 }
 
@@ -669,8 +674,8 @@ function startListenKeyboard(actionId) {
     const setBtn = row?.querySelector('.gpmap-set');
     const compact = row?.classList.contains('keymap-btn-card');
     row?.classList.add('gpmap-listening');
-    if (btnEl) btnEl.textContent = compact ? '…' : 'Press a key...';
-    if (setBtn) { setBtn.textContent = 'Cancel'; setBtn.onclick = cancelListenKeyboard; }
+    if (btnEl) btnEl.textContent = compact ? '…' : t('press_key_full');
+    if (setBtn) { setBtn.textContent = t('btn_cancel'); setBtn.onclick = cancelListenKeyboard; }
     document.addEventListener('keydown', keyCaptureHandler, true);
 }
 
@@ -708,7 +713,7 @@ document.getElementById('btnKeymapReset')?.addEventListener('click', () => {
 // ════════════════════════════════════════════
 (function init() {
     const track = document.getElementById('romTrack');
-    if (track) track.innerHTML = `<div class="rom-page rom-empty-page"><p class="rom-empty">Cargando catálogo…</p></div>`;
+    if (track) track.innerHTML = `<div class="rom-page rom-empty-page"><p class="rom-empty">${t('catalog_loading')}</p></div>`;
     loadGameLibrary();
     renderKeymapEditor();
     drawSplash();
@@ -719,3 +724,19 @@ document.getElementById('btnKeymapReset')?.addEventListener('click', () => {
     }
     enableButtons(false, false, false);
 })();
+
+// ════════════════════════════════════════════
+//  IDIOMA — re-renderizar lo que ya estaba dibujado cuando se
+//  cambia ES/EN desde el toggle del header (js/i18n.js).
+// ════════════════════════════════════════════
+window.addEventListener('vaultlangchange', () => {
+    // Los mensajes de catálogo vacío/error quedan "congelados" en el
+    // idioma en el que se cargaron — se recalculan según el estado actual.
+    if (catalogErrorKind === 'empty') catalogErrorMsg = t('catalog_empty');
+    else if (catalogErrorKind === 'failed') catalogErrorMsg = t('catalog_load_failed');
+    drawSplash();
+    renderCarousel();
+    renderGPMap();
+    renderKeymapEditor();
+    updateFullscreenBtn();
+});
