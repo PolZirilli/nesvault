@@ -765,7 +765,7 @@ footer {
     position: absolute;
     bottom: 8px;
     right: 8px;
-    z-index: 15;
+    z-index: 9998;
     background: rgba(0, 0, 0, 0.55);
     border: 1px solid var(--border2);
     color: #e4e4e6;
