@@ -402,5 +402,12 @@
     "region": "🇪🇸",
     "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Ghosts'n%20Goblins%20(USA).png",
     "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Ghosts%20'N%20Goblins%20(ESP-USA).nes"
+  },
+  {
+    "id": "ArkanoidII",
+    "name": "Arkanoid II",
+    "region": "🇬🇧",
+    "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Arkanoid%20II%20(Japan)%20(Beta).png",
+    "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Arkanoid%20II%20(ESP).nes"
   }
 ]
