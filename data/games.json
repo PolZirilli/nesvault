@@ -395,5 +395,12 @@
     "region": "🇪🇸",
     "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Galaga%20-%20Demons%20of%20Death%20(USA).png",
     "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Galaga%20-%20Demons%20of%20Death%20(ESP).nes"
+  },
+  {
+    "id": "GhostsNGoblins",
+    "name": "Ghosts 'N Goblins",
+    "region": "🇪🇸",
+    "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Boxarts/Ghosts'n%20Goblins%20(USA).png",
+    "url": "https://pub-13140bd15eda49b4a3f35bc937ab1c58.r2.dev/projects/nesvault/Ghosts%20'N%20Goblins%20(ESP-USA).nes"
   }
 ]
