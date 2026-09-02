@@ -757,7 +757,7 @@ canvas#splashCanvas {
 
 footer {
     margin-top: 28px;
-    font-size: var(--fs-sm);
+    font-size: var(--fs-xxmin);
     color: var(--chrome-dk);
     text-align: center;
     letter-spacing: 2px;
